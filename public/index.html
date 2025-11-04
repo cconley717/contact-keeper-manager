@@ -342,7 +342,7 @@
       <button id="copyOutputBtn" class="btn-info">Copy to Clipboard</button>
     </div>
 
-    <script>
+    <script type="module">
       let currentPage = 0;
       let currentSearch = "";
       let currentSort = null;
@@ -565,13 +565,13 @@
           emptyOption.value = "";
           emptyOption.textContent = "";
           outputSelect.appendChild(emptyOption);
-          
-          clients.forEach((client) => {
+
+          for(const client of clients) {
             const option = document.createElement("option");
             option.value = client.client_id;
             option.textContent = client.client_id;
             outputSelect.appendChild(option);
-          });
+          }
 
           // Update the client ID list in the management section
           const clientList = document.getElementById("clientIdList");
@@ -582,7 +582,7 @@
             const listContainer = document.createElement("div");
             listContainer.className = "client-items";
 
-            clients.forEach((client) => {
+            for(const client of clients) {
               const clientItem = document.createElement("div");
               clientItem.className = "client-item";
               
@@ -598,7 +598,7 @@
               clientItem.appendChild(clientIdSpan);
               clientItem.appendChild(deleteBtn);
               listContainer.appendChild(clientItem);
-            });
+            }
 
             clientList.appendChild(listContainer);
           }
@@ -683,7 +683,7 @@
       }
 
       // Load clients on page load
-      loadClients();
+      await loadClients();
 
       // Delete contact function
       async function deleteContact(contactId) {
