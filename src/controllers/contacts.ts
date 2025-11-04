@@ -127,8 +127,9 @@ export class ContactsController {
    */
   async createContact(req: Request, res: Response): Promise<void> {
     try {
-      // Validate and sanitize input (#3, #7, #15)
-      const validation = validateContactData(req.body);
+      const createContactDto = req.body;
+
+      const validation = validateContactData(createContactDto);
 
       if (!validation.isValid) {
         return ResponseBuilder.badRequest(res, validation.errors.join(", "));
@@ -162,7 +163,7 @@ export class ContactsController {
   }
 
   /**
-   * PUT /api/contacts/:id - Update contact by ID (allows changing contact_id)
+   * PUT /api/contacts/:id - Update an existing contact
    */
   async updateContact(req: Request, res: Response): Promise<void> {
     try {
@@ -173,8 +174,9 @@ export class ContactsController {
         return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
       }
 
-      // Validate and sanitize input (#3, #7, #15)
-      const validation = validateContactData(req.body);
+      const updateContactDto = req.body;
+
+      const validation = validateContactData(updateContactDto);
 
       if (!validation.isValid) {
         return ResponseBuilder.badRequest(res, validation.errors.join(", "));

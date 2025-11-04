@@ -33,7 +33,9 @@ export class ClientsController {
    */
   async createClient(req: Request, res: Response): Promise<void> {
     try {
-      const { client_id }: CreateClientDto = req.body;
+      const createClientDto: CreateClientDto = req.body;
+
+      const client_id = createClientDto.client_id;
 
       // Validate client_id
       if (!isPositiveInteger(client_id)) {

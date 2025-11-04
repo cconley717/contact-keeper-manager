@@ -32,7 +32,8 @@ export class ClientsController {
      */
     async createClient(req, res) {
         try {
-            const { client_id } = req.body;
+            const createClientDto = req.body;
+            const client_id = createClientDto.client_id;
             // Validate client_id
             if (!isPositiveInteger(client_id)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);

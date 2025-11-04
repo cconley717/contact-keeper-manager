@@ -3,6 +3,7 @@ import { isValidDateFormat, isPositiveInteger } from "./validation.js";
 import { ERROR_MESSAGES } from "../constants.js";
 /**
  * Validate and sanitize contact data for create/update operations
+ * Implements fixes for issues #38-47
  */
 export function validateContactData(data) {
     const errors = [];

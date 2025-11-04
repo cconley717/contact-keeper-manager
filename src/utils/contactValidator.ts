@@ -1,6 +1,7 @@
 import { InputSanitizer } from "./sanitizer.js";
 import { isValidDateFormat, isPositiveInteger } from "./validation.js";
 import { ERROR_MESSAGES } from "../constants.js";
+import type { CreateContactDto } from "../types/dto.js";
 
 export interface ContactValidationResult {
   isValid: boolean;
@@ -21,8 +22,9 @@ export interface ContactValidationResult {
 
 /**
  * Validate and sanitize contact data for create/update operations
+ * Implements fixes for issues #38-47
  */
-export function validateContactData(data: any): ContactValidationResult {
+export function validateContactData(data: CreateContactDto): ContactValidationResult {
   const errors: string[] = [];
 
   // Sanitize all input fields

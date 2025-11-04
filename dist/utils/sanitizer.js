@@ -50,8 +50,6 @@ export class InputSanitizer {
      * Sanitize an integer value with range validation (#47)
      */
     static sanitizeInteger(value) {
-        if (value === null || value === undefined)
-            return null;
         const num = Number.parseInt(String(value), 10);
         if (Number.isNaN(num))
             return null;
@@ -75,22 +73,30 @@ export class InputSanitizer {
         return trimmed;
     }
     /**
-     * Sanitize an object by applying appropriate sanitization to each field
+     * Sanitize contact data for create/update operations (#38-47)
      */
     static sanitizeContactData(data) {
-        // Type guard to ensure data is an object
-        const obj = data;
+        const getString = (val) => {
+            if (val === null || val === undefined)
+                return "";
+            return typeof val === "string" ? val : String(val);
+        };
+        const getNumber = (val) => {
+            if (val === null || val === undefined)
+                return 0;
+            return val;
+        };
         return {
-            contact_id: this.sanitizeInteger(obj.contact_id),
-            first_name: this.sanitizeString(obj.first_name),
-            last_name: this.sanitizeString(obj.last_name),
-            program: this.sanitizeString(obj.program),
-            email_address: this.sanitizeEmail(obj.email_address),
-            phone: this.sanitizePhone(obj.phone),
-            contact_created_date: this.sanitizeDate(obj.contact_created_date),
-            action: this.sanitizeString(obj.action),
-            law_firm_id: this.sanitizeInteger(obj.law_firm_id),
-            law_firm_name: this.sanitizeString(obj.law_firm_name),
+            contact_id: this.sanitizeInteger(getNumber(data.contact_id)),
+            first_name: this.sanitizeString(getString(data.first_name)),
+            last_name: this.sanitizeString(getString(data.last_name)),
+            program: this.sanitizeString(getString(data.program)),
+            email_address: this.sanitizeEmail(getString(data.email_address)),
+            phone: this.sanitizePhone(getString(data.phone)),
+            contact_created_date: this.sanitizeDate(getString(data.contact_created_date)),
+            action: this.sanitizeString(getString(data.action)),
+            law_firm_id: this.sanitizeInteger(getNumber(data.law_firm_id)),
+            law_firm_name: this.sanitizeString(getString(data.law_firm_name)),
         };
     }
 }

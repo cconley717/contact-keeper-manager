@@ -1,5 +1,6 @@
 import validator from "validator";
 import { VALIDATION } from "../constants.js";
+import type { CreateContactDto } from "../types/dto.js";
 
 /**
  * Sanitize and validate user input to prevent XSS and injection attacks
@@ -8,7 +9,7 @@ export class InputSanitizer {
   /**
    * Sanitize a string by escaping HTML and trimming whitespace
    */
-  static sanitizeString(input: any): string | null {
+  static sanitizeString(input: string): string | null {
     if (!input) return null;
 
     // Trim whitespace
@@ -27,7 +28,7 @@ export class InputSanitizer {
   /**
    * Sanitize an email address
    */
-  static sanitizeEmail(email: any): string | null {
+  static sanitizeEmail(email: string): string | null {
     if (!email) return null;
 
     const trimmed = email.trim().toLowerCase();
@@ -44,7 +45,7 @@ export class InputSanitizer {
   /**
    * Sanitize and validate phone format (#41)
    */
-  static sanitizePhone(phone: any): string | null {
+  static sanitizePhone(phone: string): string | null {
     if (!phone) return null;
 
     const trimmed = phone.trim();
@@ -58,9 +59,7 @@ export class InputSanitizer {
   /**
    * Sanitize an integer value with range validation (#47)
    */
-  static sanitizeInteger(value: any): number | null {
-    if (value === null || value === undefined) return null;
-
+  static sanitizeInteger(value: number): number | null {
     const num = Number.parseInt(String(value), 10);
 
     if (Number.isNaN(num)) return null;
@@ -76,7 +75,7 @@ export class InputSanitizer {
   /**
    * Validate and sanitize a date string in MM/DD/YYYY format
    */
-  static sanitizeDate(dateStr: any): string | null {
+  static sanitizeDate(dateStr: string): string | null {
     if (!dateStr) return null;
 
     const trimmed = dateStr.trim();
@@ -90,9 +89,9 @@ export class InputSanitizer {
   }
 
   /**
-   * Sanitize an object by applying appropriate sanitization to each field
+   * Sanitize contact data for create/update operations (#38-47)
    */
-  static sanitizeContactData(data: unknown): {
+  static sanitizeContactData(data: CreateContactDto): {
     contact_id: number | null;
     first_name: string | null;
     last_name: string | null;
@@ -104,19 +103,27 @@ export class InputSanitizer {
     law_firm_id: number | null;
     law_firm_name: string | null;
   } {
-    // Type guard to ensure data is an object
-    const obj = data as Record<string, unknown>;
+    const getString = (val: string | number | null | undefined): string => {
+      if (val === null || val === undefined) return "";
+      return typeof val === "string" ? val : String(val);
+    };
+
+    const getNumber = (val: number | null | undefined): number => {
+      if (val === null || val === undefined) return 0;
+      return val;
+    };
+
     return {
-      contact_id: this.sanitizeInteger(obj.contact_id),
-      first_name: this.sanitizeString(obj.first_name),
-      last_name: this.sanitizeString(obj.last_name),
-      program: this.sanitizeString(obj.program),
-      email_address: this.sanitizeEmail(obj.email_address),
-      phone: this.sanitizePhone(obj.phone),
-      contact_created_date: this.sanitizeDate(obj.contact_created_date),
-      action: this.sanitizeString(obj.action),
-      law_firm_id: this.sanitizeInteger(obj.law_firm_id),
-      law_firm_name: this.sanitizeString(obj.law_firm_name),
+      contact_id: this.sanitizeInteger(getNumber(data.contact_id)),
+      first_name: this.sanitizeString(getString(data.first_name)),
+      last_name: this.sanitizeString(getString(data.last_name)),
+      program: this.sanitizeString(getString(data.program)),
+      email_address: this.sanitizeEmail(getString(data.email_address)),
+      phone: this.sanitizePhone(getString(data.phone)),
+      contact_created_date: this.sanitizeDate(getString(data.contact_created_date)),
+      action: this.sanitizeString(getString(data.action)),
+      law_firm_id: this.sanitizeInteger(getNumber(data.law_firm_id)),
+      law_firm_name: this.sanitizeString(getString(data.law_firm_name)),
     };
   }
 }

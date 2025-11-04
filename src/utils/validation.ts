@@ -43,7 +43,7 @@ export function isValidDateFormat(dateStr: string): boolean {
 /**
  * Validate if a value is a positive integer (#56, #57, #59)
  */
-export function isPositiveInteger(value: any): boolean {
+export function isPositiveInteger(value: number): boolean {
   const num = Number.parseInt(String(value), 10);
   return !Number.isNaN(num) && num > 0 && num === Number(value);
 }
