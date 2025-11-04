@@ -119,6 +119,9 @@ export class ResponseBuilder {
    */
   private static sanitizeErrorMessage(message: string): string {
     // Remove any potential stack traces or file paths
-    return message.replaceAll(/\s+at\s+.*$/gm, "").replaceAll(/\/.*\//g, "").trim();
+    return message
+      .replaceAll(/\s+at\s+.*$/gm, "")
+      .replaceAll(/\/.*\//g, "")
+      .trim();
   }
 }

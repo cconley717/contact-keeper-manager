@@ -41,7 +41,9 @@ export class CsvService {
     for await (const record of parser) {
       // Check batch size limit to prevent memory issues (#41)
       if (contacts.length >= CSV_CONFIG.MAX_RECORDS_PER_BATCH) {
-        errors.push(`Batch size limit reached (${CSV_CONFIG.MAX_RECORDS_PER_BATCH} records). Additional records were not processed.`);
+        errors.push(
+          `Batch size limit reached (${CSV_CONFIG.MAX_RECORDS_PER_BATCH} records). Additional records were not processed.`
+        );
         break;
       }
 
@@ -106,9 +108,7 @@ export class CsvService {
 
       // Bulk update using save() which is more efficient than individual updates (#5)
       if (toUpdate.length > 0) {
-        const contactsToUpdate = toUpdate.map((data) =>
-          contactRepository.create(data)
-        );
+        const contactsToUpdate = toUpdate.map((data) => contactRepository.create(data));
         await contactRepository.save(contactsToUpdate);
         updated = toUpdate.length;
       }

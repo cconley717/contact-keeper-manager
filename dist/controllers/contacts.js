@@ -51,8 +51,11 @@ export class ContactsController {
             // Get total count
             const totalCount = await queryBuilder.getCount();
             // Apply sorting and pagination
+            // Use object notation for safer column reference (prevents SQL injection)
+            const orderByColumn = {};
+            orderByColumn[`contact.${sortField}`] = sortOrder;
             const contacts = await queryBuilder
-                .orderBy(`contact.${sortField}`, sortOrder)
+                .orderBy(orderByColumn)
                 .skip(page * pageSize)
                 .take(pageSize)
                 .getMany();
@@ -176,7 +179,7 @@ export class ContactsController {
                 ResponseBuilder.internalError(res, error);
             }
             else {
-                ResponseBuilder.internalError(res, new Error('An unknown error occurred'));
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
             }
         }
     }

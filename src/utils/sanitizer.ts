@@ -10,7 +10,7 @@ export class InputSanitizer {
    */
   static sanitizeString(input: string | null | undefined): string | null {
     if (!input) return null;
-    
+
     // Trim whitespace
     const trimmed = input.trim();
     if (!trimmed) return null;
@@ -31,7 +31,7 @@ export class InputSanitizer {
     if (!email) return null;
 
     const trimmed = email.trim().toLowerCase();
-    
+
     // Validate email format
     if (!validator.isEmail(trimmed)) {
       return null;
@@ -48,10 +48,10 @@ export class InputSanitizer {
     if (!phone) return null;
 
     const trimmed = phone.trim();
-    
+
     // Allow only valid phone number characters
     const cleaned = trimmed.replaceAll(/[^\d\s\-()+]/g, "");
-    
+
     return cleaned || null;
   }
 
@@ -62,14 +62,14 @@ export class InputSanitizer {
     if (value === null || value === undefined) return null;
 
     const num = Number.parseInt(String(value), 10);
-    
+
     if (Number.isNaN(num)) return null;
-    
+
     // Validate numeric range to prevent negative or overflow values
     if (num < VALIDATION.MIN_POSITIVE_INTEGER || num > VALIDATION.MAX_INTEGER) {
       return null;
     }
-    
+
     return num;
   }
 

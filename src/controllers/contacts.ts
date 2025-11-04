@@ -24,15 +24,14 @@ export class ContactsController {
         PAGINATION.MAX_PAGE_SIZE
       );
       const search = (req.query.search as string) || "";
-      
+
       // Validate sortField against whitelist to prevent SQL injection (#38)
       const requestedSortField = (req.query.sortField as string) || "contact_id";
       const sortField = VALIDATION.ALLOWED_SORT_FIELDS.includes(requestedSortField as any)
         ? requestedSortField
         : "contact_id";
-      
-      const sortOrder =
-        (req.query.sortOrder as string) === "desc" ? "DESC" : "ASC";
+
+      const sortOrder = (req.query.sortOrder as string) === "desc" ? "DESC" : "ASC";
 
       const contactRepository = this.dataSource.getRepository(Contact);
 
@@ -65,8 +64,12 @@ export class ContactsController {
       const totalCount = await queryBuilder.getCount();
 
       // Apply sorting and pagination
+      // Use object notation for safer column reference (prevents SQL injection)
+      const orderByColumn: Record<string, "ASC" | "DESC"> = {};
+      orderByColumn[`contact.${sortField}`] = sortOrder;
+
       const contacts = await queryBuilder
-        .orderBy(`contact.${sortField}`, sortOrder)
+        .orderBy(orderByColumn)
         .skip(page * pageSize)
         .take(pageSize)
         .getMany();
@@ -92,13 +95,17 @@ export class ContactsController {
       const skippedText = result.skipped > 0 ? `, ${result.skipped} skipped` : "";
       const message = `Successfully imported ${result.totalRecords - result.skipped} contacts (${result.inserted} new, ${result.updated} updated)${skippedText}`;
 
-      ResponseBuilder.success(res, {
-        count: result.totalRecords - result.skipped,
-        inserted: result.inserted,
-        updated: result.updated,
-        skipped: result.skipped,
-        errors: result.errors,
-      }, message);
+      ResponseBuilder.success(
+        res,
+        {
+          count: result.totalRecords - result.skipped,
+          inserted: result.inserted,
+          updated: result.updated,
+          skipped: result.skipped,
+          errors: result.errors,
+        },
+        message
+      );
     } catch (error) {
       ResponseBuilder.internalError(res, error as Error);
     }
@@ -126,10 +133,7 @@ export class ContactsController {
 
       if (existingContact) {
         // Update existing contact
-        await contactRepository.update(
-          { contact_id: contactData.contact_id },
-          contactData
-        );
+        await contactRepository.update({ contact_id: contactData.contact_id }, contactData);
         ResponseBuilder.success(res, { action: "updated" }, "Contact updated successfully");
       } else {
         // Insert new contact
@@ -165,12 +169,9 @@ export class ContactsController {
       // Use transaction to prevent race conditions
       await this.dataSource.transaction(async (transactionalEntityManager) => {
         // Check if original contact exists
-        const existingContact = await transactionalEntityManager.findOne(
-          Contact,
-          {
-            where: { contact_id: originalContactId },
-          }
-        );
+        const existingContact = await transactionalEntityManager.findOne(Contact, {
+          where: { contact_id: originalContactId },
+        });
 
         if (!existingContact) {
           throw new Error(ERROR_MESSAGES.CONTACT_NOT_FOUND);
@@ -178,12 +179,9 @@ export class ContactsController {
 
         // If contact_id is being changed, check if new ID already exists
         if (contactData.contact_id !== originalContactId) {
-          const conflictingContact = await transactionalEntityManager.findOne(
-            Contact,
-            {
-              where: { contact_id: contactData.contact_id },
-            }
-          );
+          const conflictingContact = await transactionalEntityManager.findOne(Contact, {
+            where: { contact_id: contactData.contact_id },
+          });
 
           if (conflictingContact) {
             throw new Error(ERROR_MESSAGES.CONTACT_ID_EXISTS);
@@ -200,9 +198,10 @@ export class ContactsController {
         await transactionalEntityManager.save(Contact, contact);
       });
 
-      const idChangedText = contactData.contact_id !== originalContactId
-        ? ` (ID changed from ${originalContactId} to ${contactData.contact_id})`
-        : "";
+      const idChangedText =
+        contactData.contact_id !== originalContactId
+          ? ` (ID changed from ${originalContactId} to ${contactData.contact_id})`
+          : "";
       ResponseBuilder.success(res, undefined, `Contact updated successfully${idChangedText}`);
     } catch (error) {
       // Proper error type checking with type guard (#46)
@@ -215,7 +214,7 @@ export class ContactsController {
         }
         ResponseBuilder.internalError(res, error);
       } else {
-        ResponseBuilder.internalError(res, new Error('An unknown error occurred'));
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
       }
     }
   }

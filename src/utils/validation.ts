@@ -6,40 +6,37 @@
  * @returns true if valid date format, false otherwise
  */
 export function isValidDateFormat(dateStr: string): boolean {
-  if (!dateStr || typeof dateStr !== 'string') {
+  if (!dateStr || typeof dateStr !== "string") {
     return false;
   }
 
   // Check format with regex: M/D/YYYY or MM/DD/YYYY (leading zeros optional)
   // Month: 1-12 or 01-12, Day: 1-31 or 01-31, Year: 4 digits
   const dateRegex = /^(0?[1-9]|1[0-2])\/(0?[1-9]|[12]\d|3[01])\/\d{4}$/;
-  
+
   if (!dateRegex.test(dateStr)) {
     return false;
   }
 
   // Parse and validate actual date
-  const [month, day, year] = dateStr.split('/').map(Number);
+  const [month, day, year] = dateStr.split("/").map(Number);
   const date = new Date(year, month - 1, day);
-  
+
   // Check if date is valid and matches input
   // This catches invalid dates like 2/31/2024
-  const isValid = (
-    date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day
-  );
-  
+  const isValid =
+    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+
   if (!isValid) {
     return false;
   }
-  
+
   // Additional validation: check days per month
   const daysInMonth = new Date(year, month, 0).getDate();
   if (day > daysInMonth) {
     return false;
   }
-  
+
   return true;
 }
 
@@ -49,5 +46,5 @@ export function isValidDateFormat(dateStr: string): boolean {
  * @returns true if positive integer, false otherwise
  */
 export function isPositiveInteger(value: any): boolean {
-  return typeof value === 'number' && Number.isInteger(value) && value > 0;
+  return typeof value === "number" && Number.isInteger(value) && value > 0;
 }

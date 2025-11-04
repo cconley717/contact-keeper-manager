@@ -74,7 +74,10 @@ export class ResponseBuilder {
      */
     static sanitizeErrorMessage(message) {
         // Remove any potential stack traces or file paths
-        return message.replaceAll(/\s+at\s+.*$/gm, "").replaceAll(/\/.*\//g, "").trim();
+        return message
+            .replaceAll(/\s+at\s+.*$/gm, "")
+            .replaceAll(/\/.*\//g, "")
+            .trim();
     }
 }
 //# sourceMappingURL=response.js.map

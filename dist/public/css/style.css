@@ -18,7 +18,7 @@
   --spacing-xl: 20px;
   --spacing-xxl: 30px;
   --spacing-xxxl: 40px;
-  
+
   /* Colors */
   --color-primary: #007bff;
   --color-primary-hover: #0056b3;
@@ -32,7 +32,7 @@
   --color-info-hover: #138496;
   --color-secondary: #6c757d;
   --color-secondary-hover: #5a6268;
-  
+
   --color-text-primary: #333;
   --color-text-secondary: #555;
   --color-text-tertiary: #666;
@@ -45,15 +45,15 @@
   --color-bg-gray: #f0f0f0;
   --color-bg-success: #d4edda;
   --color-bg-error: #f8d7da;
-  
+
   /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
-  
+
   /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
-  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-  
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+
   /* Dimensions */
   --grid-height: 500px;
   --modal-width: 700px;
@@ -68,7 +68,10 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
   padding: var(--spacing-xl);
   background-color: var(--color-bg-light);
 }

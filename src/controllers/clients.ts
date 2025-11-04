@@ -82,7 +82,11 @@ export class ClientsController {
       // Delete the client
       await clientRepository.delete({ id: clientId });
 
-      ResponseBuilder.success(res, undefined, `Client ID ${existingClient.client_id} deleted successfully`);
+      ResponseBuilder.success(
+        res,
+        undefined,
+        `Client ID ${existingClient.client_id} deleted successfully`
+      );
     } catch (error) {
       ResponseBuilder.internalError(res, error as Error);
     }

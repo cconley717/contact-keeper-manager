@@ -7,7 +7,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-import { Entity, PrimaryColumn, Column, Index } from 'typeorm';
+import { Entity, PrimaryColumn, Column, Index } from "typeorm";
 let Contact = class Contact {
     contact_id;
     first_name = null;
@@ -21,56 +21,56 @@ let Contact = class Contact {
     law_firm_name = null;
 };
 __decorate([
-    PrimaryColumn('integer'),
+    PrimaryColumn("integer"),
     __metadata("design:type", Number)
 ], Contact.prototype, "contact_id", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "first_name", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "last_name", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "program", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "email_address", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "phone", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "contact_created_date", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "action", void 0);
 __decorate([
     Index(),
-    Column('integer', { nullable: true }),
+    Column("integer", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "law_firm_id", void 0);
 __decorate([
     Index(),
-    Column('text', { nullable: true }),
+    Column("text", { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "law_firm_name", void 0);
 Contact = __decorate([
-    Entity('contacts')
+    Entity("contacts")
 ], Contact);
 export { Contact };
 //# sourceMappingURL=Contact.js.map

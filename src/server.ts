@@ -21,9 +21,11 @@ function validatePort(portValue: string | undefined): number {
   }
 
   const port = Number.parseInt(portValue, 10);
-  
+
   if (Number.isNaN(port) || port < 1 || port > 65535) {
-    console.error(`Invalid PORT value: ${portValue}. Using default port ${SERVER_CONFIG.DEFAULT_PORT}`);
+    console.error(
+      `Invalid PORT value: ${portValue}. Using default port ${SERVER_CONFIG.DEFAULT_PORT}`
+    );
     return SERVER_CONFIG.DEFAULT_PORT;
   }
 
@@ -62,18 +64,18 @@ try {
   console.log("Initializing database...");
   await AppDataSource.initialize();
   console.log("Database initialized successfully");
-  
+
   // Mount route modules
   const contactsRouter = createContactsRouter(AppDataSource, upload);
   const clientsRouter = createClientsRouter(AppDataSource);
-  
+
   app.use("/api/contacts", contactsRouter);
   app.use("/api/clients", clientsRouter);
-  
+
   const server = app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
-  
+
   // Configure request timeout to prevent hanging requests (#40)
   server.timeout = SERVER_CONFIG.REQUEST_TIMEOUT_MS;
 } catch (error) {

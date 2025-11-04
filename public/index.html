@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -17,35 +17,27 @@
       <div class="modal-content">
         <div class="modal-header">
           <h2>Update Contact</h2>
-          <button type="button" class="modal-close" onclick="closeUpdateModal()" aria-label="Close modal">&times;</button>
+          <button
+            type="button"
+            class="modal-close"
+            onclick="closeUpdateModal()"
+            aria-label="Close modal"
+          >
+            &times;
+          </button>
         </div>
         <div class="modal-form-grid">
           <div>
             <label class="form-label" for="updateContactId">Contact ID *</label>
-            <input
-              type="number"
-              id="updateContactId"
-              class="form-input"
-              required
-            />
+            <input type="number" id="updateContactId" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateFirstName">First Name *</label>
-            <input
-              type="text"
-              id="updateFirstName"
-              class="form-input"
-              required
-            />
+            <input type="text" id="updateFirstName" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateLastName">Last Name *</label>
-            <input
-              type="text"
-              id="updateLastName"
-              class="form-input"
-              required
-            />
+            <input type="text" id="updateLastName" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateProgram">Program</label>
@@ -61,12 +53,7 @@
           </div>
           <div>
             <label class="form-label" for="updateCreatedDate">Contact Created Date *</label>
-            <input
-              type="text"
-              id="updateCreatedDate"
-              class="form-input"
-              required
-            />
+            <input type="text" id="updateCreatedDate" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateAction">Action</label>
@@ -74,30 +61,16 @@
           </div>
           <div>
             <label class="form-label" for="updateLawFirmId">Law Firm ID *</label>
-            <input
-              type="number"
-              id="updateLawFirmId"
-              class="form-input"
-              required
-            />
+            <input type="number" id="updateLawFirmId" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateLawFirmName">Law Firm Name *</label>
-            <input
-              type="text"
-              id="updateLawFirmName"
-              class="form-input"
-              required
-            />
+            <input type="text" id="updateLawFirmName" class="form-input" required />
           </div>
         </div>
         <div class="modal-actions">
-          <button class="btn-secondary" onclick="closeUpdateModal()">
-            Cancel
-          </button>
-          <button class="btn-success" onclick="saveUpdatedContact()">
-            Save Changes
-          </button>
+          <button class="btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+          <button class="btn-success" onclick="saveUpdatedContact()">Save Changes</button>
         </div>
       </div>
     </div>
@@ -127,21 +100,11 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newContactId">Contact ID *</label>
-                <input
-                  type="number"
-                  id="newContactId"
-                  class="form-input"
-                  required
-                />
+                <input type="number" id="newContactId" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newFirstName">First Name *</label>
-                <input
-                  type="text"
-                  id="newFirstName"
-                  class="form-input"
-                  required
-                />
+                <input type="text" id="newFirstName" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLastName">Last Name *</label>
@@ -175,26 +138,14 @@
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
-                <input
-                  type="number"
-                  id="newLawFirmId"
-                  class="form-input"
-                  required
-                />
+                <input type="number" id="newLawFirmId" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
-                <input
-                  type="text"
-                  id="newLawFirmName"
-                  class="form-input"
-                  required
-                />
+                <input type="text" id="newLawFirmName" class="form-input" required />
               </div>
             </div>
-            <button id="addContactBtn" class="btn-success btn-large">
-              Add Contact
-            </button>
+            <button id="addContactBtn" class="btn-success btn-large">Add Contact</button>
             <div id="addContactMessage"></div>
           </div>
         </div>
@@ -219,11 +170,9 @@
                 />
               </div>
             </div>
-            <button id="addClientIdBtn" class="btn-success btn-large">
-              Add Client ID
-            </button>
+            <button id="addClientIdBtn" class="btn-success btn-large">Add Client ID</button>
             <div id="addClientMessage"></div>
-            
+
             <!-- List of existing client IDs -->
             <div id="clientIdList" class="client-list"></div>
           </div>
@@ -267,24 +216,16 @@
               <td>
                 <select data-field="topic">
                   <option value=""></option>
-                  <option value="General Information">
-                    General Information
-                  </option>
-                  <option value="Payment Information">
-                    Payment Information
-                  </option>
+                  <option value="General Information">General Information</option>
+                  <option value="Payment Information">Payment Information</option>
                   <option value="Portal Navigation">Portal Navigation</option>
                   <option value="EIF Question">EIF Question</option>
                   <option value="EPP Question">EPP Question</option>
                   <option value="FIFO Question">FIFO Question</option>
                   <option value="DPP Question">DPP Question</option>
-                  <option value="Bankruptcy Question">
-                    Bankruptcy Question
-                  </option>
+                  <option value="Bankruptcy Question">Bankruptcy Question</option>
                   <option value="Liens Question">Liens Question</option>
-                  <option value="Consortium Question">
-                    Consortium Question
-                  </option>
+                  <option value="Consortium Question">Consortium Question</option>
                   <option value="Ledgering Question">Ledgering Question</option>
                   <option value="Report Question">Report Question</option>
                   <option value="Attorney Representation Related">
@@ -388,14 +329,12 @@
 
               if (target.classList.contains("select-btn")) {
                 // Populate Contact ID field
-                document.querySelector(
-                  '.output-section input[data-field="contact_id"]'
-                ).value = rowData.contact_id || "";
+                document.querySelector('.output-section input[data-field="contact_id"]').value =
+                  rowData.contact_id || "";
 
                 // Populate Firm ID field
-                document.querySelector(
-                  '.output-section input[data-field="law_firm_id"]'
-                ).value = rowData.law_firm_id || "";
+                document.querySelector('.output-section input[data-field="law_firm_id"]').value =
+                  rowData.law_firm_id || "";
               } else if (target.classList.contains("update-btn")) {
                 // Open update modal
                 openUpdateModal(rowData);
@@ -512,7 +451,7 @@
       const searchInput = document.getElementById("searchInput");
       const searchBtn = document.getElementById("searchBtn");
       const clearSearchBtn = document.getElementById("clearSearchBtn");
-      
+
       let searchDebounceTimer = null;
 
       function performSearch() {
@@ -573,9 +512,7 @@
 
       addClientToggle.addEventListener("click", function () {
         addClientForm.classList.toggle("collapsible-content--visible");
-        addClientIcon.textContent = addClientForm.classList.contains(
-          "collapsible-content--visible"
-        )
+        addClientIcon.textContent = addClientForm.classList.contains("collapsible-content--visible")
           ? "▼"
           : "▶";
       });
@@ -589,15 +526,16 @@
 
           // Populate the output table dropdown
           const outputSelect = document.getElementById("outputClientIdSelect");
+          // Clear existing options safely (already using textContent, no XSS risk here)
           outputSelect.innerHTML = "";
-          
+
           // Add empty default option
           const emptyOption = document.createElement("option");
           emptyOption.value = "";
           emptyOption.textContent = "";
           outputSelect.appendChild(emptyOption);
 
-          for(const client of clients) {
+          for (const client of clients) {
             const option = document.createElement("option");
             option.value = client.client_id;
             option.textContent = client.client_id;
@@ -607,25 +545,34 @@
           // Update the client ID list in the management section
           const clientList = document.getElementById("clientIdList");
           if (clients.length === 0) {
-            clientList.innerHTML = "<p class='no-clients-message'>No client IDs yet. Add one above!</p>";
+            // Prevent XSS by using textContent instead of innerHTML
+            clientList.textContent = "";
+            const noClientsMsg = document.createElement("p");
+            noClientsMsg.className = "no-clients-message";
+            noClientsMsg.textContent = "No client IDs yet. Add one above!";
+            clientList.appendChild(noClientsMsg);
           } else {
-            clientList.innerHTML = "<h3>Existing Client IDs:</h3>";
+            // Prevent XSS by using textContent instead of innerHTML
+            clientList.textContent = "";
+            const heading = document.createElement("h3");
+            heading.textContent = "Existing Client IDs:";
+            clientList.appendChild(heading);
             const listContainer = document.createElement("div");
             listContainer.className = "client-items";
 
-            for(const client of clients) {
+            for (const client of clients) {
               const clientItem = document.createElement("div");
               clientItem.className = "client-item";
-              
+
               const clientIdSpan = document.createElement("span");
               clientIdSpan.className = "client-item__id";
               clientIdSpan.textContent = client.client_id;
-              
+
               const deleteBtn = document.createElement("button");
               deleteBtn.className = "btn-danger btn-small";
               deleteBtn.textContent = "Delete";
               deleteBtn.onclick = () => deleteClient(client.id, client.client_id);
-              
+
               clientItem.appendChild(clientIdSpan);
               clientItem.appendChild(deleteBtn);
               listContainer.appendChild(clientItem);
@@ -646,9 +593,14 @@
       // Helper function to show messages with auto-dismiss
       function showMessage(elementId, message, type, timeout = CONFIG.MESSAGE_TIMEOUT_MS) {
         const element = document.getElementById(elementId);
-        element.innerHTML = `<div class="message message--${type}">${message}</div>`;
+        // Prevent XSS by using textContent instead of innerHTML
+        element.textContent = "";
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message message--${type}`;
+        messageDiv.textContent = message;
+        element.appendChild(messageDiv);
         setTimeout(() => {
-          element.innerHTML = "";
+          element.textContent = "";
         }, timeout);
       }
 
@@ -676,14 +628,14 @@
           if (response.ok) {
             showMessage("addClientMessage", data.message, "success");
             newClientIdInput.value = "";
-            
+
             // Add new client to dropdown and list without refetching
             const newClient = data.data;
             const outputSelect = document.getElementById("outputClientIdSelect");
             const option = document.createElement("option");
             option.value = newClient.client_id;
             option.textContent = newClient.client_id;
-            
+
             // Insert in sorted position
             let inserted = false;
             for (let i = 1; i < outputSelect.options.length; i++) {
@@ -696,7 +648,7 @@
             if (!inserted) {
               outputSelect.appendChild(option);
             }
-            
+
             // Refresh the client list display
             await loadClients();
           } else {
@@ -741,11 +693,7 @@
 
       // Delete contact function
       async function deleteContact(contactId) {
-        if (
-          !confirm(
-            `Are you sure you want to delete contact ID ${contactId}?`
-          )
-        ) {
+        if (!confirm(`Are you sure you want to delete contact ID ${contactId}?`)) {
           return;
         }
 
@@ -774,56 +722,39 @@
       globalThis.openUpdateModal = function openUpdateModal(contactData) {
         originalContactId = contactData.contact_id; // Store original ID
 
-        document.getElementById("updateContactId").value =
-          contactData.contact_id || "";
-        document.getElementById("updateFirstName").value =
-          contactData.first_name || "";
-        document.getElementById("updateLastName").value =
-          contactData.last_name || "";
-        document.getElementById("updateProgram").value =
-          contactData.program || "";
-        document.getElementById("updateEmail").value =
-          contactData.email_address || "";
+        document.getElementById("updateContactId").value = contactData.contact_id || "";
+        document.getElementById("updateFirstName").value = contactData.first_name || "";
+        document.getElementById("updateLastName").value = contactData.last_name || "";
+        document.getElementById("updateProgram").value = contactData.program || "";
+        document.getElementById("updateEmail").value = contactData.email_address || "";
         document.getElementById("updatePhone").value = contactData.phone || "";
-        document.getElementById("updateCreatedDate").value =
-          contactData.contact_created_date || "";
-        document.getElementById("updateAction").value =
-          contactData.action || "";
-        document.getElementById("updateLawFirmId").value =
-          contactData.law_firm_id || "";
-        document.getElementById("updateLawFirmName").value =
-          contactData.law_firm_name || "";
+        document.getElementById("updateCreatedDate").value = contactData.contact_created_date || "";
+        document.getElementById("updateAction").value = contactData.action || "";
+        document.getElementById("updateLawFirmId").value = contactData.law_firm_id || "";
+        document.getElementById("updateLawFirmName").value = contactData.law_firm_name || "";
 
         document.getElementById("updateModal").classList.add("modal--visible");
       };
 
       globalThis.closeUpdateModal = function closeUpdateModal() {
-        document
-          .getElementById("updateModal")
-          .classList.remove("modal--visible");
+        document.getElementById("updateModal").classList.remove("modal--visible");
         originalContactId = null; // Clear stored ID
       };
 
       globalThis.saveUpdatedContact = async function saveUpdatedContact() {
         const contactData = {
-          contact_id: Number.parseInt(
-            document.getElementById("updateContactId").value
-          ),
+          contact_id: Number.parseInt(document.getElementById("updateContactId").value),
           first_name: document.getElementById("updateFirstName").value.trim(),
           last_name: document.getElementById("updateLastName").value.trim(),
           program: document.getElementById("updateProgram").value.trim(),
           email_address: document.getElementById("updateEmail").value.trim(),
           phone: document.getElementById("updatePhone").value.trim(),
-          contact_created_date: document
-            .getElementById("updateCreatedDate")
-            .value.trim(),
+          contact_created_date: document.getElementById("updateCreatedDate").value.trim(),
           action: document.getElementById("updateAction").value.trim(),
           law_firm_id: document.getElementById("updateLawFirmId").value
             ? Number.parseInt(document.getElementById("updateLawFirmId").value)
             : null,
-          law_firm_name: document
-            .getElementById("updateLawFirmName")
-            .value.trim(),
+          law_firm_name: document.getElementById("updateLawFirmName").value.trim(),
         };
 
         // Validation
@@ -861,7 +792,7 @@
           console.error("Error updating contact:", error);
           alert("Failed to update contact. Please try again.");
         }
-      }
+      };
 
       // Close modal when clicking outside of it
       document.getElementById("updateModal").addEventListener("click", function (event) {
@@ -916,14 +847,12 @@
               currentServerPage - 1
             })" ${currentServerPage === 0 ? "disabled" : ""}>Previous</button>
             <span>Page ${currentServerPage + 1} of ${totalPages}</span>
-            <button class="btn-primary" onclick="goToPage(${
-              currentServerPage + 1
-            })" ${
-          currentServerPage >= totalPages - 1 ? "disabled" : ""
-        }>Next</button>
+            <button class="btn-primary" onclick="goToPage(${currentServerPage + 1})" ${
+              currentServerPage >= totalPages - 1 ? "disabled" : ""
+            }>Next</button>
             <button class="btn-primary" onclick="goToPage(${totalPages - 1})" ${
-          currentServerPage >= totalPages - 1 ? "disabled" : ""
-        }>Last</button>
+              currentServerPage >= totalPages - 1 ? "disabled" : ""
+            }>Last</button>
           </div>
         </div>
       `;
@@ -935,6 +864,7 @@
           paginationDiv.id = "customPagination";
           document.querySelector(".grid-section").appendChild(paginationDiv);
         }
+        // Safe to use innerHTML here - paginationHtml is constructed from trusted constants only
         paginationDiv.innerHTML = paginationHtml;
       }
 
@@ -949,17 +879,13 @@
 
       addContactBtn.addEventListener("click", async function () {
         const contactData = {
-          contact_id: Number.parseInt(
-            document.getElementById("newContactId").value
-          ),
+          contact_id: Number.parseInt(document.getElementById("newContactId").value),
           first_name: document.getElementById("newFirstName").value.trim(),
           last_name: document.getElementById("newLastName").value.trim(),
           program: document.getElementById("newProgram").value.trim(),
           email_address: document.getElementById("newEmail").value.trim(),
           phone: document.getElementById("newPhone").value.trim(),
-          contact_created_date: document
-            .getElementById("newCreatedDate")
-            .value.trim(),
+          contact_created_date: document.getElementById("newCreatedDate").value.trim(),
           action: document.getElementById("newAction").value.trim(),
           law_firm_id: document.getElementById("newLawFirmId").value
             ? Number.parseInt(document.getElementById("newLawFirmId").value)
@@ -1052,7 +978,7 @@
 
         uploadBtn.disabled = true;
         uploadBtn.textContent = "Uploading...";
-        uploadMessage.innerHTML = "";
+        uploadMessage.textContent = "";
 
         try {
           const response = await fetch("/api/contacts/upload", {
@@ -1093,9 +1019,7 @@
           const contactId = document.querySelector(
             '.output-section input[data-field="contact_id"]'
           ).value;
-          const topic = document.querySelector(
-            '.output-section select[data-field="topic"]'
-          ).value;
+          const topic = document.querySelector('.output-section select[data-field="topic"]').value;
           const firmId = document.querySelector(
             '.output-section input[data-field="law_firm_id"]'
           ).value;
