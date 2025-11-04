@@ -2,6 +2,7 @@ import { Client } from "../entities/Client.js";
 import { ResponseBuilder } from "../utils/response.js";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../constants.js";
 import { isPositiveInteger } from "../utils/validation.js";
+import { validateClientData } from "../utils/clientValidator.js";
 export class ClientsController {
     dataSource;
     constructor(dataSource) {
@@ -33,16 +34,12 @@ export class ClientsController {
     async createClient(req, res) {
         try {
             const createClientDto = req.body;
-            // Convert to string if number was sent
-            const client_id = String(createClientDto.client_id || "").trim();
-            // Validate client_id exists and is not empty
-            if (!client_id) {
-                return ResponseBuilder.badRequest(res, "Client ID is required and cannot be empty");
+            // Validate and sanitize client data
+            const validation = validateClientData(createClientDto);
+            if (!validation.isValid) {
+                return ResponseBuilder.badRequest(res, validation.errors.join(", "));
             }
-            // Validate client_id format
-            if (!isPositiveInteger(client_id)) {
-                return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
-            }
+            const { client_id } = validation.sanitizedData;
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client_id already exists
             const existingClient = await clientRepository.findOne({

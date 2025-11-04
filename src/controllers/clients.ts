@@ -5,6 +5,7 @@ import type { CreateClientDto } from "../types/dto.js";
 import { ResponseBuilder } from "../utils/response.js";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../constants.js";
 import { isPositiveInteger } from "../utils/validation.js";
+import { validateClientData } from "../utils/clientValidator.js";
 
 export class ClientsController {
   constructor(private readonly dataSource: DataSource) {}
@@ -35,18 +36,14 @@ export class ClientsController {
     try {
       const createClientDto: CreateClientDto = req.body;
 
-      // Convert to string if number was sent
-      const client_id = String(createClientDto.client_id || "").trim();
+      // Validate and sanitize client data
+      const validation = validateClientData(createClientDto);
 
-      // Validate client_id exists and is not empty
-      if (!client_id) {
-        return ResponseBuilder.badRequest(res, "Client ID is required and cannot be empty");
+      if (!validation.isValid) {
+        return ResponseBuilder.badRequest(res, validation.errors.join(", "));
       }
 
-      // Validate client_id format
-      if (!isPositiveInteger(client_id)) {
-        return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
-      }
+      const { client_id } = validation.sanitizedData;
 
       const clientRepository = this.dataSource.getRepository(Client);
 

@@ -1,6 +1,7 @@
 import validator from "validator";
 import { VALIDATION } from "../constants.js";
-import type { CreateContactDto, SanitizedContactData } from "../types/dto.js";
+import type { CreateContactDto } from "../types/dto.js";
+import { SanitizedContactData } from "./contactValidator.js";
 
 /**
  * Sanitize and validate user input to prevent XSS and injection attacks

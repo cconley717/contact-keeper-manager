@@ -1,7 +1,20 @@
 import { InputSanitizer } from "./sanitizer.js";
 import { isValidDateFormat, isPositiveInteger } from "./validation.js";
 import { ERROR_MESSAGES } from "../constants.js";
-import type { CreateContactDto, SanitizedContactData } from "../types/dto.js";
+import type { CreateContactDto } from "../types/dto.js";
+
+export interface SanitizedContactData {
+  contact_id: string;
+  first_name: string;
+  last_name: string;
+  program: string;
+  email_address: string;
+  phone: string;
+  contact_created_date: string;
+  action: string;
+  law_firm_id: string;
+  law_firm_name: string;
+}
 
 export interface ContactValidationResult {
   isValid: boolean;
