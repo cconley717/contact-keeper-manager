@@ -110,20 +110,20 @@ export class ContactsController {
             if (!validation.isValid) {
                 return ResponseBuilder.badRequest(res, validation.errors.join(", "));
             }
-            const contactData = validation.sanitizedData;
+            const sanitizedData = validation.sanitizedData;
             const contactRepository = this.dataSource.getRepository(Contact);
             // Check if contact already exists
             const existingContact = await contactRepository.findOne({
-                where: { contact_id: contactData.contact_id },
+                where: { contact_id: sanitizedData.contact_id },
             });
             if (existingContact) {
                 // Update existing contact
-                await contactRepository.update({ contact_id: contactData.contact_id }, contactData);
+                await contactRepository.update({ contact_id: sanitizedData.contact_id }, sanitizedData);
                 ResponseBuilder.success(res, { action: "updated" }, "Contact updated successfully");
             }
             else {
                 // Insert new contact
-                const newContact = contactRepository.create(contactData);
+                const newContact = contactRepository.create(sanitizedData);
                 await contactRepository.save(newContact);
                 ResponseBuilder.success(res, { action: "inserted" }, "Contact added successfully");
             }
@@ -142,7 +142,7 @@ export class ContactsController {
      */
     async updateContact(req, res) {
         try {
-            const contactId = Number.parseInt(req.params.id, 10);
+            const contactId = req.params.id;
             // Validate ID using consistent helper function
             if (!isPositiveInteger(contactId)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
@@ -205,7 +205,7 @@ export class ContactsController {
      */
     async deleteContact(req, res) {
         try {
-            const contactId = Number.parseInt(req.params.id, 10);
+            const contactId = req.params.id;
             // Validate ID using consistent helper function
             if (!isPositiveInteger(contactId)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);

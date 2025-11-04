@@ -33,26 +33,24 @@ export class CsvService {
                 errors.push(`Batch size limit reached (${CSV_CONFIG.MAX_RECORDS_PER_BATCH} records). Additional records were not processed.`);
                 break;
             }
-            const contactId = Number.parseInt(record[cols.CONTACT_ID], 10);
+            const contactId = record[cols.CONTACT_ID]?.trim() || "";
             // Skip records with invalid contact_id
-            if (Number.isNaN(contactId) || contactId === 0) {
+            if (!contactId) {
                 skipped++;
-                errors.push(`Skipping record with invalid contact_id: ${record[cols.CONTACT_ID]}`);
+                errors.push(`Skipping record with missing contact_id`);
                 continue;
             }
             contacts.push({
                 contact_id: contactId,
-                first_name: record[cols.FIRST_NAME] || null,
-                last_name: record[cols.LAST_NAME] || null,
-                program: record[cols.PROGRAM] || null,
-                email_address: record[cols.EMAIL_ADDRESS] || null,
-                phone: record[cols.PHONE] || null,
-                contact_created_date: record[cols.CONTACT_CREATED_DATE] || null,
-                action: record[cols.ACTION] || null,
-                law_firm_id: record[cols.LAW_FIRM_ID]
-                    ? Number.parseInt(record[cols.LAW_FIRM_ID], 10)
-                    : null,
-                law_firm_name: record[cols.LAW_FIRM_NAME] || null,
+                first_name: record[cols.FIRST_NAME],
+                last_name: record[cols.LAST_NAME],
+                program: record[cols.PROGRAM],
+                email_address: record[cols.EMAIL_ADDRESS],
+                phone: record[cols.PHONE],
+                contact_created_date: record[cols.CONTACT_CREATED_DATE],
+                action: record[cols.ACTION],
+                law_firm_id: record[cols.LAW_FIRM_ID],
+                law_firm_name: record[cols.LAW_FIRM_NAME],
             });
         }
         // Perform bulk upsert within a transaction to prevent race conditions (#4)
@@ -69,7 +67,7 @@ export class CsvService {
             const toInsert = [];
             const toUpdate = [];
             for (const contactData of contacts) {
-                if (existingContactIds.has(contactData.contact_id)) {
+                if (contactData.contact_id && existingContactIds.has(contactData.contact_id)) {
                     toUpdate.push(contactData);
                 }
                 else {
@@ -91,13 +89,14 @@ export class CsvService {
             }
             return { inserted, updated };
         });
-        return {
+        const csvImportResult = {
             totalRecords: contacts.length + skipped,
             inserted: result.inserted,
             updated: result.updated,
             skipped,
             errors,
         };
+        return csvImportResult;
     }
 }
 //# sourceMappingURL=csvService.js.map

@@ -34,8 +34,8 @@ export function isValidDateFormat(dateStr) {
  * Validate if a value is a positive integer (#56, #57, #59)
  */
 export function isPositiveInteger(value) {
-    const num = Number.parseInt(String(value), 10);
-    return !Number.isNaN(num) && num > 0 && num === Number(value);
+    const num = Number.parseInt(value, 10);
+    return !Number.isNaN(num) && num > 0 && String(num) === value;
 }
 /**
  * Validates and parses PORT environment variable

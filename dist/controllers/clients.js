@@ -33,8 +33,13 @@ export class ClientsController {
     async createClient(req, res) {
         try {
             const createClientDto = req.body;
-            const client_id = createClientDto.client_id;
-            // Validate client_id
+            // Convert to string if number was sent
+            const client_id = String(createClientDto.client_id || "").trim();
+            // Validate client_id exists and is not empty
+            if (!client_id) {
+                return ResponseBuilder.badRequest(res, "Client ID is required and cannot be empty");
+            }
+            // Validate client_id format
             if (!isPositiveInteger(client_id)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
             }
@@ -65,22 +70,23 @@ export class ClientsController {
      */
     async deleteClient(req, res) {
         try {
-            const id = Number.parseInt(req.params.id, 10);
+            const id = req.params.id;
             // Validate ID using consistent helper function
             if (!isPositiveInteger(id)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
             }
+            // Convert string ID to find the client by database id (auto-increment)
+            const numId = Number.parseInt(id, 10);
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client exists
             const existingClient = await clientRepository.findOne({
-                where: { id },
+                where: { id: numId },
             });
             if (!existingClient) {
                 return ResponseBuilder.notFound(res, ERROR_MESSAGES.CLIENT_NOT_FOUND);
             }
-            // Delete the client
-            await clientRepository.delete({ id });
-            ResponseBuilder.success(res, undefined, `Client ID ${existingClient.client_id} deleted successfully`);
+            await clientRepository.delete({ id: numId });
+            ResponseBuilder.success(res, {}, `Client ID ${existingClient.client_id} deleted successfully`);
         }
         catch (error) {
             if (error instanceof Error) {

@@ -9,11 +9,11 @@ export class InputSanitizer {
      */
     static sanitizeString(input) {
         if (!input)
-            return null;
+            return "";
         // Trim whitespace
         const trimmed = input.trim();
         if (!trimmed)
-            return null;
+            return "";
         // Escape HTML to prevent XSS
         const sanitized = validator.escape(trimmed);
         // Enforce max length
@@ -26,11 +26,11 @@ export class InputSanitizer {
      */
     static sanitizeEmail(email) {
         if (!email)
-            return null;
+            return "";
         const trimmed = email.trim().toLowerCase();
         // Validate email format
         if (!validator.isEmail(trimmed)) {
-            return null;
+            return "";
         }
         // Normalize and escape
         return validator.normalizeEmail(trimmed) || trimmed;
@@ -40,35 +40,37 @@ export class InputSanitizer {
      */
     static sanitizePhone(phone) {
         if (!phone)
-            return null;
+            return "";
         const trimmed = phone.trim();
         // Allow only valid phone number characters
         const cleaned = trimmed.replaceAll(/[^\d\s\-()+]/g, "");
-        return cleaned || null;
+        return cleaned || "";
     }
     /**
-     * Sanitize an integer value with range validation (#47)
+     * Sanitize a string representation of an integer with range validation (#47)
      */
     static sanitizeInteger(value) {
-        const num = Number.parseInt(String(value), 10);
+        if (!value)
+            return "";
+        const num = Number.parseInt(value, 10);
         if (Number.isNaN(num))
-            return null;
+            return "";
         // Validate numeric range to prevent negative or overflow values
         if (num < VALIDATION.MIN_POSITIVE_INTEGER || num > VALIDATION.MAX_INTEGER) {
-            return null;
+            return "";
         }
-        return num;
+        return String(num);
     }
     /**
      * Validate and sanitize a date string in MM/DD/YYYY format
      */
     static sanitizeDate(dateStr) {
         if (!dateStr)
-            return null;
+            return "";
         const trimmed = dateStr.trim();
         // Check format with regex
         if (!VALIDATION.DATE_FORMAT_REGEX.test(trimmed)) {
-            return null;
+            return "";
         }
         return trimmed;
     }
@@ -76,27 +78,17 @@ export class InputSanitizer {
      * Sanitize contact data for create/update operations (#38-47)
      */
     static sanitizeContactData(data) {
-        const getString = (val) => {
-            if (val === null || val === undefined)
-                return "";
-            return typeof val === "string" ? val : String(val);
-        };
-        const getNumber = (val) => {
-            if (val === null || val === undefined)
-                return 0;
-            return val;
-        };
         return {
-            contact_id: this.sanitizeInteger(getNumber(data.contact_id)),
-            first_name: this.sanitizeString(getString(data.first_name)),
-            last_name: this.sanitizeString(getString(data.last_name)),
-            program: this.sanitizeString(getString(data.program)),
-            email_address: this.sanitizeEmail(getString(data.email_address)),
-            phone: this.sanitizePhone(getString(data.phone)),
-            contact_created_date: this.sanitizeDate(getString(data.contact_created_date)),
-            action: this.sanitizeString(getString(data.action)),
-            law_firm_id: this.sanitizeInteger(getNumber(data.law_firm_id)),
-            law_firm_name: this.sanitizeString(getString(data.law_firm_name)),
+            contact_id: this.sanitizeInteger(data.contact_id),
+            first_name: this.sanitizeString(data.first_name),
+            last_name: this.sanitizeString(data.last_name),
+            program: this.sanitizeString(data.program),
+            email_address: this.sanitizeEmail(data.email_address),
+            phone: this.sanitizePhone(data.phone),
+            contact_created_date: this.sanitizeDate(data.contact_created_date),
+            action: this.sanitizeString(data.action),
+            law_firm_id: this.sanitizeInteger(data.law_firm_id),
+            law_firm_name: this.sanitizeString(data.law_firm_name),
         };
     }
 }

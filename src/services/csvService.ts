@@ -21,7 +21,7 @@ export class CsvService {
    * Parse and import contacts from CSV buffer
    */
   async importContacts(fileBuffer: Buffer): Promise<CsvImportResult> {
-    const contacts: Partial<Contact>[] = [];
+    const contacts: Contact[] = [];
     const errors: string[] = [];
     let skipped = 0;
 
@@ -47,28 +47,26 @@ export class CsvService {
         break;
       }
 
-      const contactId = Number.parseInt(record[cols.CONTACT_ID], 10);
+      const contactId = record[cols.CONTACT_ID]?.trim() || "";
 
       // Skip records with invalid contact_id
-      if (Number.isNaN(contactId) || contactId === 0) {
+      if (!contactId) {
         skipped++;
-        errors.push(`Skipping record with invalid contact_id: ${record[cols.CONTACT_ID]}`);
+        errors.push(`Skipping record with missing contact_id`);
         continue;
       }
 
       contacts.push({
         contact_id: contactId,
-        first_name: record[cols.FIRST_NAME] || null,
-        last_name: record[cols.LAST_NAME] || null,
-        program: record[cols.PROGRAM] || null,
-        email_address: record[cols.EMAIL_ADDRESS] || null,
-        phone: record[cols.PHONE] || null,
-        contact_created_date: record[cols.CONTACT_CREATED_DATE] || null,
-        action: record[cols.ACTION] || null,
-        law_firm_id: record[cols.LAW_FIRM_ID]
-          ? Number.parseInt(record[cols.LAW_FIRM_ID], 10)
-          : null,
-        law_firm_name: record[cols.LAW_FIRM_NAME] || null,
+        first_name: record[cols.FIRST_NAME],
+        last_name: record[cols.LAST_NAME],
+        program: record[cols.PROGRAM],
+        email_address: record[cols.EMAIL_ADDRESS],
+        phone: record[cols.PHONE],
+        contact_created_date: record[cols.CONTACT_CREATED_DATE],
+        action: record[cols.ACTION],
+        law_firm_id: record[cols.LAW_FIRM_ID],
+        law_firm_name: record[cols.LAW_FIRM_NAME],
       });
     }
 
@@ -77,7 +75,7 @@ export class CsvService {
       const contactRepository = transactionalEntityManager.getRepository(Contact);
 
       // Get all existing contact IDs in one query
-      const contactIds = contacts.map((c) => c.contact_id as number);
+      const contactIds = contacts.map((c) => c.contact_id);
       const existingContacts = await contactRepository.find({
         select: ["contact_id"],
         where: contactIds.map((id) => ({ contact_id: id })),
@@ -90,7 +88,7 @@ export class CsvService {
       const toUpdate: Partial<Contact>[] = [];
 
       for (const contactData of contacts) {
-        if (existingContactIds.has(contactData.contact_id as number)) {
+        if (contactData.contact_id && existingContactIds.has(contactData.contact_id)) {
           toUpdate.push(contactData);
         } else {
           toInsert.push(contactData);
@@ -116,12 +114,14 @@ export class CsvService {
       return { inserted, updated };
     });
 
-    return {
+    const csvImportResult: CsvImportResult = {
       totalRecords: contacts.length + skipped,
       inserted: result.inserted,
       updated: result.updated,
       skipped,
       errors,
     };
+
+    return csvImportResult;
   }
 }

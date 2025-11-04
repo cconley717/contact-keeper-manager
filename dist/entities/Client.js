@@ -17,8 +17,8 @@ __decorate([
     __metadata("design:type", Number)
 ], Client.prototype, "id", void 0);
 __decorate([
-    Column({ unique: true, type: "integer" }),
-    __metadata("design:type", Number)
+    Column({ unique: true, type: "text" }),
+    __metadata("design:type", String)
 ], Client.prototype, "client_id", void 0);
 Client = __decorate([
     Entity("clients")

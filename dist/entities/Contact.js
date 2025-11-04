@@ -10,64 +10,64 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 import { Entity, PrimaryColumn, Column, Index } from "typeorm";
 let Contact = class Contact {
     contact_id;
-    first_name = null;
-    last_name = null;
-    program = null;
-    email_address = null;
-    phone = null;
-    contact_created_date = null;
-    action = null;
-    law_firm_id = null;
-    law_firm_name = null;
+    first_name = "";
+    last_name = "";
+    program = "";
+    email_address = "";
+    phone = "";
+    contact_created_date = "";
+    action = "";
+    law_firm_id = "";
+    law_firm_name = "";
 };
 __decorate([
-    PrimaryColumn("integer"),
-    __metadata("design:type", Number)
+    PrimaryColumn("text"),
+    __metadata("design:type", String)
 ], Contact.prototype, "contact_id", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "first_name", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "last_name", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "program", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "email_address", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "phone", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "contact_created_date", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "action", void 0);
 __decorate([
     Index(),
-    Column("integer", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "law_firm_id", void 0);
 __decorate([
     Index(),
-    Column("text", { nullable: true }),
-    __metadata("design:type", Object)
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
 ], Contact.prototype, "law_firm_name", void 0);
 Contact = __decorate([
     Entity("contacts")

@@ -1,6 +1,6 @@
 import validator from "validator";
 import { VALIDATION } from "../constants.js";
-import type { CreateContactDto } from "../types/dto.js";
+import type { CreateContactDto, SanitizedContactData } from "../types/dto.js";
 
 /**
  * Sanitize and validate user input to prevent XSS and injection attacks
@@ -9,12 +9,12 @@ export class InputSanitizer {
   /**
    * Sanitize a string by escaping HTML and trimming whitespace
    */
-  static sanitizeString(input: string): string | null {
-    if (!input) return null;
+  static sanitizeString(input: string): string {
+    if (!input) return "";
 
     // Trim whitespace
     const trimmed = input.trim();
-    if (!trimmed) return null;
+    if (!trimmed) return "";
 
     // Escape HTML to prevent XSS
     const sanitized = validator.escape(trimmed);
@@ -28,14 +28,14 @@ export class InputSanitizer {
   /**
    * Sanitize an email address
    */
-  static sanitizeEmail(email: string): string | null {
-    if (!email) return null;
+  static sanitizeEmail(email: string): string {
+    if (!email) return "";
 
     const trimmed = email.trim().toLowerCase();
 
     // Validate email format
     if (!validator.isEmail(trimmed)) {
-      return null;
+      return "";
     }
 
     // Normalize and escape
@@ -45,44 +45,46 @@ export class InputSanitizer {
   /**
    * Sanitize and validate phone format (#41)
    */
-  static sanitizePhone(phone: string): string | null {
-    if (!phone) return null;
+  static sanitizePhone(phone: string): string {
+    if (!phone) return "";
 
     const trimmed = phone.trim();
 
     // Allow only valid phone number characters
     const cleaned = trimmed.replaceAll(/[^\d\s\-()+]/g, "");
 
-    return cleaned || null;
+    return cleaned || "";
   }
 
   /**
-   * Sanitize an integer value with range validation (#47)
+   * Sanitize a string representation of an integer with range validation (#47)
    */
-  static sanitizeInteger(value: number): number | null {
-    const num = Number.parseInt(String(value), 10);
+  static sanitizeInteger(value: string): string {
+    if (!value) return "";
 
-    if (Number.isNaN(num)) return null;
+    const num = Number.parseInt(value, 10);
+
+    if (Number.isNaN(num)) return "";
 
     // Validate numeric range to prevent negative or overflow values
     if (num < VALIDATION.MIN_POSITIVE_INTEGER || num > VALIDATION.MAX_INTEGER) {
-      return null;
+      return "";
     }
 
-    return num;
+    return String(num);
   }
 
   /**
    * Validate and sanitize a date string in MM/DD/YYYY format
    */
-  static sanitizeDate(dateStr: string): string | null {
-    if (!dateStr) return null;
+  static sanitizeDate(dateStr: string): string {
+    if (!dateStr) return "";
 
     const trimmed = dateStr.trim();
 
     // Check format with regex
     if (!VALIDATION.DATE_FORMAT_REGEX.test(trimmed)) {
-      return null;
+      return "";
     }
 
     return trimmed;
@@ -91,39 +93,18 @@ export class InputSanitizer {
   /**
    * Sanitize contact data for create/update operations (#38-47)
    */
-  static sanitizeContactData(data: CreateContactDto): {
-    contact_id: number | null;
-    first_name: string | null;
-    last_name: string | null;
-    program: string | null;
-    email_address: string | null;
-    phone: string | null;
-    contact_created_date: string | null;
-    action: string | null;
-    law_firm_id: number | null;
-    law_firm_name: string | null;
-  } {
-    const getString = (val: string | number | null | undefined): string => {
-      if (val === null || val === undefined) return "";
-      return typeof val === "string" ? val : String(val);
-    };
-
-    const getNumber = (val: number | null | undefined): number => {
-      if (val === null || val === undefined) return 0;
-      return val;
-    };
-
+  static sanitizeContactData(data: CreateContactDto): SanitizedContactData {
     return {
-      contact_id: this.sanitizeInteger(getNumber(data.contact_id)),
-      first_name: this.sanitizeString(getString(data.first_name)),
-      last_name: this.sanitizeString(getString(data.last_name)),
-      program: this.sanitizeString(getString(data.program)),
-      email_address: this.sanitizeEmail(getString(data.email_address)),
-      phone: this.sanitizePhone(getString(data.phone)),
-      contact_created_date: this.sanitizeDate(getString(data.contact_created_date)),
-      action: this.sanitizeString(getString(data.action)),
-      law_firm_id: this.sanitizeInteger(getNumber(data.law_firm_id)),
-      law_firm_name: this.sanitizeString(getString(data.law_firm_name)),
+      contact_id: this.sanitizeInteger(data.contact_id),
+      first_name: this.sanitizeString(data.first_name),
+      last_name: this.sanitizeString(data.last_name),
+      program: this.sanitizeString(data.program),
+      email_address: this.sanitizeEmail(data.email_address),
+      phone: this.sanitizePhone(data.phone),
+      contact_created_date: this.sanitizeDate(data.contact_created_date),
+      action: this.sanitizeString(data.action),
+      law_firm_id: this.sanitizeInteger(data.law_firm_id),
+      law_firm_name: this.sanitizeString(data.law_firm_name),
     };
   }
 }

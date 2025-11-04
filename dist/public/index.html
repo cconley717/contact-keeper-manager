@@ -29,7 +29,7 @@
         <div class="modal-form-grid">
           <div>
             <label class="form-label" for="updateContactId">Contact ID *</label>
-            <input type="number" id="updateContactId" class="form-input" required />
+            <input type="text" id="updateContactId" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateFirstName">First Name *</label>
@@ -61,7 +61,7 @@
           </div>
           <div>
             <label class="form-label" for="updateLawFirmId">Law Firm ID *</label>
-            <input type="number" id="updateLawFirmId" class="form-input" required />
+            <input type="text" id="updateLawFirmId" class="form-input" required />
           </div>
           <div>
             <label class="form-label" for="updateLawFirmName">Law Firm Name *</label>
@@ -100,7 +100,7 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newContactId">Contact ID *</label>
-                <input type="number" id="newContactId" class="form-input" required />
+                <input type="text" id="newContactId" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newFirstName">First Name *</label>
@@ -138,7 +138,7 @@
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
-                <input type="number" id="newLawFirmId" class="form-input" required />
+                <input type="text" id="newLawFirmId" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
@@ -160,14 +160,7 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newClientIdInput">Client ID *</label>
-                <input
-                  type="number"
-                  id="newClientIdInput"
-                  class="form-input"
-                  min="1"
-                  step="1"
-                  required
-                />
+                <input type="text" id="newClientIdInput" class="form-input" required />
               </div>
             </div>
             <button id="addClientIdBtn" class="btn-success btn-large">Add Client ID</button>
@@ -605,11 +598,11 @@
       }
 
       addClientIdBtn.addEventListener("click", async function () {
-        const clientId = Number.parseInt(newClientIdInput.value.trim());
+        const clientId = newClientIdInput.value.trim();
 
         // Validation
-        if (!clientId || clientId <= 0) {
-          showMessage("addClientMessage", "Please enter a positive client ID", "error");
+        if (!clientId) {
+          showMessage("addClientMessage", "Please enter a client ID", "error");
           return;
         }
 
@@ -743,7 +736,7 @@
 
       globalThis.saveUpdatedContact = async function saveUpdatedContact() {
         const contactData = {
-          contact_id: Number.parseInt(document.getElementById("updateContactId").value),
+          contact_id: document.getElementById("updateContactId").value.trim(),
           first_name: document.getElementById("updateFirstName").value.trim(),
           last_name: document.getElementById("updateLastName").value.trim(),
           program: document.getElementById("updateProgram").value.trim(),
@@ -751,9 +744,7 @@
           phone: document.getElementById("updatePhone").value.trim(),
           contact_created_date: document.getElementById("updateCreatedDate").value.trim(),
           action: document.getElementById("updateAction").value.trim(),
-          law_firm_id: document.getElementById("updateLawFirmId").value
-            ? Number.parseInt(document.getElementById("updateLawFirmId").value)
-            : null,
+          law_firm_id: document.getElementById("updateLawFirmId").value.trim(),
           law_firm_name: document.getElementById("updateLawFirmName").value.trim(),
         };
 
@@ -879,7 +870,7 @@
 
       addContactBtn.addEventListener("click", async function () {
         const contactData = {
-          contact_id: Number.parseInt(document.getElementById("newContactId").value),
+          contact_id: document.getElementById("newContactId").value.trim(),
           first_name: document.getElementById("newFirstName").value.trim(),
           last_name: document.getElementById("newLastName").value.trim(),
           program: document.getElementById("newProgram").value.trim(),
@@ -887,9 +878,7 @@
           phone: document.getElementById("newPhone").value.trim(),
           contact_created_date: document.getElementById("newCreatedDate").value.trim(),
           action: document.getElementById("newAction").value.trim(),
-          law_firm_id: document.getElementById("newLawFirmId").value
-            ? Number.parseInt(document.getElementById("newLawFirmId").value)
-            : null,
+          law_firm_id: document.getElementById("newLawFirmId").value.trim(),
           law_firm_name: document.getElementById("newLawFirmName").value.trim(),
         };
 

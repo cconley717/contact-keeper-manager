@@ -2,42 +2,42 @@ import { Entity, PrimaryColumn, Column, Index } from "typeorm";
 
 @Entity("contacts")
 export class Contact {
-  @PrimaryColumn("integer")
-  contact_id!: number;
+  @PrimaryColumn("text")
+  contact_id!: string;
 
   @Index()
-  @Column("text", { nullable: true })
-  first_name: string | null = null;
+  @Column("text", { default: "" })
+  first_name: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  last_name: string | null = null;
+  @Column("text", { default: "" })
+  last_name: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  program: string | null = null;
+  @Column("text", { default: "" })
+  program: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  email_address: string | null = null;
+  @Column("text", { default: "" })
+  email_address: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  phone: string | null = null;
+  @Column("text", { default: "" })
+  phone: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  contact_created_date: string | null = null;
+  @Column("text", { default: "" })
+  contact_created_date: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  action: string | null = null;
+  @Column("text", { default: "" })
+  action: string = "";
 
   @Index()
-  @Column("integer", { nullable: true })
-  law_firm_id: number | null = null;
+  @Column("text", { default: "" })
+  law_firm_id: string = "";
 
   @Index()
-  @Column("text", { nullable: true })
-  law_firm_name: string | null = null;
+  @Column("text", { default: "" })
+  law_firm_name: string = "";
 }
