@@ -689,7 +689,7 @@
       async function deleteContact(contactId) {
         if (
           !confirm(
-            `Are you sure you want to delete contact ID ${contactId}? This action cannot be undone.`
+            `Are you sure you want to delete contact ID ${contactId}?`
           )
         ) {
           return;
@@ -717,7 +717,7 @@
       // Update contact modal functions
       let originalContactId = null; // Store the original contact ID
 
-      function openUpdateModal(contactData) {
+      globalThis.openUpdateModal = function openUpdateModal(contactData) {
         originalContactId = contactData.contact_id; // Store original ID
 
         document.getElementById("updateContactId").value =
@@ -741,16 +741,16 @@
           contactData.law_firm_name || "";
 
         document.getElementById("updateModal").classList.add("modal--visible");
-      }
+      };
 
-      function closeUpdateModal() {
+      globalThis.closeUpdateModal = function closeUpdateModal() {
         document
           .getElementById("updateModal")
           .classList.remove("modal--visible");
         originalContactId = null; // Clear stored ID
-      }
+      };
 
-      async function saveUpdatedContact() {
+      globalThis.saveUpdatedContact = async function saveUpdatedContact() {
         const contactData = {
           contact_id: Number.parseInt(
             document.getElementById("updateContactId").value
@@ -885,10 +885,10 @@
         paginationDiv.innerHTML = paginationHtml;
       }
 
-      function goToPage(page) {
+      globalThis.goToPage = function goToPage(page) {
         currentServerPage = page;
         loadData();
-      }
+      };
 
       // Add new contact functionality
       const addContactBtn = document.getElementById("addContactBtn");
