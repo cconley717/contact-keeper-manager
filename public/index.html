@@ -343,7 +343,27 @@
     </div>
 
     <script type="module">
-      let currentPage = 0;
+      // Configuration constants (#10, #57)
+      const CONFIG = {
+        PAGE_SIZE: 20,
+        SEARCH_DEBOUNCE_MS: 300,
+        MESSAGE_TIMEOUT_MS: 3000,
+        // AG-Grid column widths
+        COLUMN_WIDTHS: {
+          ACTIONS: 260,
+          CONTACT_ID: 120,
+          FIRST_NAME: 140,
+          LAST_NAME: 140,
+          PROGRAM: 180,
+          EMAIL_ADDRESS: 220,
+          PHONE: 150,
+          CREATED_DATE: 130,
+          FIRM_ID: 100,
+          LAW_FIRM_NAME: 200,
+          ACTION: 100,
+        },
+      };
+
       let currentSearch = "";
       let currentSort = null;
 
@@ -354,7 +374,7 @@
           {
             field: "actions",
             headerName: "",
-            width: 260,
+            width: CONFIG.COLUMN_WIDTHS.ACTIONS,
             cellRenderer: function (params) {
               return `
               <button class="select-btn">Select</button>
@@ -390,70 +410,70 @@
           {
             field: "contact_id",
             headerName: "Contact ID",
-            width: 120,
+            width: CONFIG.COLUMN_WIDTHS.CONTACT_ID,
             filter: true,
             sortable: true,
           },
           {
             field: "first_name",
             headerName: "First Name",
-            width: 140,
+            width: CONFIG.COLUMN_WIDTHS.FIRST_NAME,
             filter: true,
             sortable: true,
           },
           {
             field: "last_name",
             headerName: "Last Name",
-            width: 140,
+            width: CONFIG.COLUMN_WIDTHS.LAST_NAME,
             filter: true,
             sortable: true,
           },
           {
             field: "program",
             headerName: "Program",
-            width: 180,
+            width: CONFIG.COLUMN_WIDTHS.PROGRAM,
             filter: true,
             sortable: true,
           },
           {
             field: "email_address",
             headerName: "Email Address",
-            width: 220,
+            width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS,
             filter: true,
             sortable: true,
           },
           {
             field: "phone",
             headerName: "Phone",
-            width: 150,
+            width: CONFIG.COLUMN_WIDTHS.PHONE,
             filter: true,
             sortable: true,
           },
           {
             field: "contact_created_date",
             headerName: "Created Date",
-            width: 130,
+            width: CONFIG.COLUMN_WIDTHS.CREATED_DATE,
             filter: true,
             sortable: true,
           },
           {
             field: "law_firm_id",
             headerName: "Firm ID",
-            width: 100,
+            width: CONFIG.COLUMN_WIDTHS.FIRM_ID,
             filter: true,
             sortable: true,
           },
           {
             field: "law_firm_name",
             headerName: "Law Firm",
-            width: 200,
+            width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME,
             filter: true,
             sortable: true,
           },
           {
             field: "action",
             headerName: "Action",
-            width: 100,
+            width: CONFIG.COLUMN_WIDTHS.ACTION,
             filter: true,
             sortable: true,
           },
@@ -512,14 +532,14 @@
         loadData();
       });
 
-      // Debounced search on typing (300ms delay)
+      // Debounced search on typing
       searchInput.addEventListener("input", function () {
         if (searchDebounceTimer) {
           clearTimeout(searchDebounceTimer);
         }
         searchDebounceTimer = setTimeout(() => {
           performSearch();
-        }, 300);
+        }, CONFIG.SEARCH_DEBOUNCE_MS);
       });
 
       // Allow Enter key to search immediately
@@ -531,15 +551,6 @@
           performSearch();
         }
       });
-
-      // Pre-populate Contact Created Date with today's date
-      const today = new Date();
-      const month = String(today.getMonth() + 1).padStart(2, "0");
-      const day = String(today.getDate()).padStart(2, "0");
-      const year = today.getFullYear();
-      document.getElementById(
-        "newCreatedDate"
-      ).value = `${month}/${day}/${year}`;
 
       // Toggle Add Contact form
       const addContactToggle = document.getElementById("addContactToggle");
@@ -633,7 +644,7 @@
       const newClientIdInput = document.getElementById("newClientIdInput");
 
       // Helper function to show messages with auto-dismiss
-      function showMessage(elementId, message, type, timeout = 3000) {
+      function showMessage(elementId, message, type, timeout = CONFIG.MESSAGE_TIMEOUT_MS) {
         const element = document.getElementById(elementId);
         element.innerHTML = `<div class="message message--${type}">${message}</div>`;
         setTimeout(() => {
@@ -863,7 +874,7 @@
       async function loadData() {
         try {
           // Use our own page tracking since we're doing server-side pagination
-          let url = `/api/contacts?page=${currentServerPage}&pageSize=20`;
+          let url = `/api/contacts?page=${currentServerPage}&pageSize=${CONFIG.PAGE_SIZE}`;
 
           if (currentSort) {
             url += `&sortField=${currentSort.field}&sortOrder=${currentSort.order}`;
@@ -890,9 +901,9 @@
       }
 
       function updatePaginationDisplay() {
-        const totalPages = Math.ceil(totalRowCount / 20);
-        const startRow = currentServerPage * 20 + 1;
-        const endRow = Math.min((currentServerPage + 1) * 20, totalRowCount);
+        const totalPages = Math.ceil(totalRowCount / CONFIG.PAGE_SIZE);
+        const startRow = currentServerPage * CONFIG.PAGE_SIZE + 1;
+        const endRow = Math.min((currentServerPage + 1) * CONFIG.PAGE_SIZE, totalRowCount);
 
         let paginationHtml = `
         <div class="pagination-container">
@@ -1056,7 +1067,7 @@
             csvFile.value = "";
 
             // Refresh grid
-            currentPage = 0;
+            currentServerPage = 0;
             loadData();
           } else {
             showMessage("uploadMessage", data.message || "Upload failed", "error");
@@ -1178,7 +1189,7 @@
           setTimeout(() => {
             copyOutputBtn.textContent = originalText;
             copyOutputBtn.classList.remove("btn-info--copied");
-          }, 2000);
+          }, CONFIG.MESSAGE_TIMEOUT_MS - 1000);
         } catch (error) {
           console.error("Error copying to clipboard:", error);
           alert("Failed to copy to clipboard. Please try again.");

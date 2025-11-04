@@ -35,6 +35,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Contact.prototype, "last_name", void 0);
 __decorate([
+    Index(),
     Column('text', { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "program", void 0);
@@ -44,6 +45,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Contact.prototype, "email_address", void 0);
 __decorate([
+    Index(),
     Column('text', { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "phone", void 0);
@@ -53,6 +55,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Contact.prototype, "contact_created_date", void 0);
 __decorate([
+    Index(),
     Column('text', { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "action", void 0);
@@ -62,6 +65,7 @@ __decorate([
     __metadata("design:type", Object)
 ], Contact.prototype, "law_firm_id", void 0);
 __decorate([
+    Index(),
     Column('text', { nullable: true }),
     __metadata("design:type", Object)
 ], Contact.prototype, "law_firm_name", void 0);

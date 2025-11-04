@@ -1,12 +1,17 @@
 import type { Request, Response } from "express";
 import { DataSource } from "typeorm";
-import { parse } from "csv-parse";
 import { Contact } from "../entities/Contact.js";
-import type { CreateContactDto, UpdateContactDto } from "../types/dto.js";
-import { isValidDateFormat, isPositiveInteger } from "../utils/validation.js";
+import { ResponseBuilder } from "../utils/response.js";
+import { validateContactData } from "../utils/contactValidator.js";
+import { CsvService } from "../services/csvService.js";
+import { PAGINATION, ERROR_MESSAGES, VALIDATION } from "../constants.js";
 
 export class ContactsController {
-  constructor(private readonly dataSource: DataSource) {}
+  private readonly csvService: CsvService;
+
+  constructor(private readonly dataSource: DataSource) {
+    this.csvService = new CsvService(dataSource);
+  }
 
   /**
    * GET /api/contacts - Fetch contacts with pagination, search, and sorting
@@ -14,9 +19,18 @@ export class ContactsController {
   async getContacts(req: Request, res: Response): Promise<void> {
     try {
       const page = Number.parseInt(req.query.page as string) || 0;
-      const pageSize = Number.parseInt(req.query.pageSize as string) || 20;
+      const pageSize = Math.min(
+        Number.parseInt(req.query.pageSize as string) || PAGINATION.DEFAULT_PAGE_SIZE,
+        PAGINATION.MAX_PAGE_SIZE
+      );
       const search = (req.query.search as string) || "";
-      const sortField = (req.query.sortField as string) || "contact_id";
+      
+      // Validate sortField against whitelist to prevent SQL injection (#38)
+      const requestedSortField = (req.query.sortField as string) || "contact_id";
+      const sortField = VALIDATION.ALLOWED_SORT_FIELDS.includes(requestedSortField as any)
+        ? requestedSortField
+        : "contact_id";
+      
       const sortOrder =
         (req.query.sortOrder as string) === "desc" ? "DESC" : "ASC";
 
@@ -57,15 +71,9 @@ export class ContactsController {
         .take(pageSize)
         .getMany();
 
-      res.json({
-        data: contacts,
-        totalCount,
-        page,
-        pageSize,
-      });
+      ResponseBuilder.paginated(res, contacts, totalCount, page, pageSize);
     } catch (error) {
-      console.error("Error fetching contacts:", error);
-      res.status(500).json({ error: "Failed to fetch contacts" });
+      ResponseBuilder.internalError(res, error as Error);
     }
   }
 
@@ -74,110 +82,25 @@ export class ContactsController {
    */
   async uploadCsv(req: Request, res: Response): Promise<void> {
     if (!req.file) {
-      res.status(400).json({ success: false, message: "No file uploaded" });
-      return;
+      return ResponseBuilder.badRequest(res, ERROR_MESSAGES.NO_FILE_UPLOADED);
     }
 
     try {
-      // Get file buffer from memory storage
-      const fileBuffer = req.file.buffer;
-      const contacts: Partial<Contact>[] = [];
+      // Use CSV service to handle import within transaction (#4, #5, #24, #33)
+      const result = await this.csvService.importContacts(req.file.buffer);
 
-      // Parse CSV from buffer (in-memory, no file system writes)
-      const parser = parse(fileBuffer, {
-        columns: true,
-        skip_empty_lines: true,
-        trim: true,
-        quote: '"',
-        escape: '"',
-        bom: true,
-      });
+      const skippedText = result.skipped > 0 ? `, ${result.skipped} skipped` : "";
+      const message = `Successfully imported ${result.totalRecords - result.skipped} contacts (${result.inserted} new, ${result.updated} updated)${skippedText}`;
 
-      for await (const record of parser) {
-        const contactId = Number.parseInt(record["contact_id"], 10);
-
-        // Skip records with invalid contact_id
-        if (Number.isNaN(contactId) || contactId === 0) {
-          console.warn(
-            `Skipping record with invalid contact_id: ${record["contact_id"]}`
-          );
-          continue;
-        }
-
-        contacts.push({
-          contact_id: contactId,
-          first_name: record["first_name"] || null,
-          last_name: record["last_name"] || null,
-          program: record["program"] || null,
-          email_address: record["email_address"] || null,
-          phone: record["phone"] || null,
-          contact_created_date: record["contact_created_date"] || null,
-          action: record["action"] || null,
-          law_firm_id: record["law_firm_id"]
-            ? Number.parseInt(record["law_firm_id"], 10)
-            : null,
-          law_firm_name: record["law_firm_name"] || null,
-        });
-      }
-
-      // Save contacts (upsert based on contact_id)
-      const contactRepository = this.dataSource.getRepository(Contact);
-
-      // Bulk upsert to avoid N+1 query problem
-      let inserted = 0;
-      let updated = 0;
-
-      // Get all existing contact IDs in one query
-      const existingContactIds = new Set(
-        (
-          await contactRepository.find({
-            select: ["contact_id"],
-            where: contacts.map((c) => ({ contact_id: c.contact_id as number })),
-          })
-        ).map((c) => c.contact_id)
-      );
-
-      // Separate into inserts and updates
-      const toInsert: Partial<Contact>[] = [];
-      const toUpdate: Partial<Contact>[] = [];
-
-      for (const contactData of contacts) {
-        if (existingContactIds.has(contactData.contact_id as number)) {
-          toUpdate.push(contactData);
-        } else {
-          toInsert.push(contactData);
-        }
-      }
-
-      // Bulk insert new contacts
-      if (toInsert.length > 0) {
-        await contactRepository.insert(toInsert);
-        inserted = toInsert.length;
-      }
-
-      // Bulk update existing contacts
-      if (toUpdate.length > 0) {
-        for (const contactData of toUpdate) {
-          await contactRepository.update(
-            { contact_id: contactData.contact_id as number },
-            contactData
-          );
-        }
-        updated = toUpdate.length;
-      }
-
-      res.json({
-        success: true,
-        message: `Successfully imported ${contacts.length} contacts (${inserted} new, ${updated} updated)`,
-        data: {
-          count: contacts.length,
-          inserted,
-          updated,
-        },
-      });
+      ResponseBuilder.success(res, {
+        count: result.totalRecords - result.skipped,
+        inserted: result.inserted,
+        updated: result.updated,
+        skipped: result.skipped,
+        errors: result.errors,
+      }, message);
     } catch (error) {
-      console.error("Error processing CSV:", error);
-      res.status(500).json({ success: false, message: "Failed to process CSV file" });
+      ResponseBuilder.internalError(res, error as Error);
     }
   }
 
@@ -186,52 +109,14 @@ export class ContactsController {
    */
   async createContact(req: Request, res: Response): Promise<void> {
     try {
-      const contactData: CreateContactDto = req.body;
+      // Validate and sanitize input (#3, #7, #15)
+      const validation = validateContactData(req.body);
 
-      // Validate required fields
-      if (
-        !contactData.contact_id ||
-        !contactData.first_name ||
-        !contactData.last_name ||
-        !contactData.email_address ||
-        !contactData.contact_created_date ||
-        !contactData.law_firm_id ||
-        !contactData.law_firm_name
-      ) {
-        res.status(400).json({
-          success: false,
-          message:
-            "Contact ID, First Name, Last Name, Email Address, Contact Created Date, Law Firm ID, and Law Firm Name are required",
-        });
-        return;
+      if (!validation.isValid) {
+        return ResponseBuilder.badRequest(res, validation.errors.join(", "));
       }
 
-      // Validate date format
-      if (!isValidDateFormat(contactData.contact_created_date)) {
-        res.status(400).json({
-          success: false,
-          message: "Contact Created Date must be in MM/DD/YYYY format",
-        });
-        return;
-      }
-
-      // Validate positive integers
-      if (!isPositiveInteger(contactData.contact_id)) {
-        res.status(400).json({
-          success: false,
-          message: "Contact ID must be a positive integer",
-        });
-        return;
-      }
-
-      if (!isPositiveInteger(contactData.law_firm_id)) {
-        res.status(400).json({
-          success: false,
-          message: "Law Firm ID must be a positive integer",
-        });
-        return;
-      }
-
+      const contactData = validation.sanitizedData!;
       const contactRepository = this.dataSource.getRepository(Contact);
 
       // Check if contact already exists
@@ -243,47 +128,17 @@ export class ContactsController {
         // Update existing contact
         await contactRepository.update(
           { contact_id: contactData.contact_id },
-          {
-            first_name: contactData.first_name,
-            last_name: contactData.last_name,
-            program: contactData.program || null,
-            email_address: contactData.email_address || null,
-            phone: contactData.phone || null,
-            contact_created_date: contactData.contact_created_date || null,
-            action: contactData.action || null,
-            law_firm_id: contactData.law_firm_id || null,
-            law_firm_name: contactData.law_firm_name || null,
-          }
+          contactData
         );
-        res.json({
-          success: true,
-          message: "Contact updated successfully",
-          action: "updated",
-        });
+        ResponseBuilder.success(res, { action: "updated" }, "Contact updated successfully");
       } else {
         // Insert new contact
-        const newContact = contactRepository.create({
-          contact_id: contactData.contact_id,
-          first_name: contactData.first_name,
-          last_name: contactData.last_name,
-          program: contactData.program || null,
-          email_address: contactData.email_address || null,
-          phone: contactData.phone || null,
-          contact_created_date: contactData.contact_created_date || null,
-          action: contactData.action || null,
-          law_firm_id: contactData.law_firm_id || null,
-          law_firm_name: contactData.law_firm_name || null,
-        });
+        const newContact = contactRepository.create(contactData);
         await contactRepository.save(newContact);
-        res.json({
-          success: true,
-          message: "Contact added successfully",
-          action: "inserted",
-        });
+        ResponseBuilder.success(res, { action: "inserted" }, "Contact added successfully");
       }
     } catch (error) {
-      console.error("Error adding contact:", error);
-      res.status(500).json({ success: false, message: "Failed to add contact" });
+      ResponseBuilder.internalError(res, error as Error);
     }
   }
 
@@ -293,56 +148,19 @@ export class ContactsController {
   async updateContact(req: Request, res: Response): Promise<void> {
     try {
       const originalContactId = Number.parseInt(req.params.id, 10);
-      const contactData: UpdateContactDto = req.body;
 
       if (Number.isNaN(originalContactId)) {
-        res.status(400).json({ success: false, message: "Invalid contact ID" });
-        return;
+        return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
       }
 
-      // Validate required fields
-      if (
-        !contactData.contact_id ||
-        !contactData.first_name ||
-        !contactData.last_name ||
-        !contactData.email_address ||
-        !contactData.contact_created_date ||
-        !contactData.law_firm_id ||
-        !contactData.law_firm_name
-      ) {
-        res.status(400).json({
-          success: false,
-          message:
-            "Contact ID, First Name, Last Name, Email Address, Contact Created Date, Law Firm ID, and Law Firm Name are required",
-        });
-        return;
+      // Validate and sanitize input (#3, #7, #15)
+      const validation = validateContactData(req.body);
+
+      if (!validation.isValid) {
+        return ResponseBuilder.badRequest(res, validation.errors.join(", "));
       }
 
-      // Validate date format
-      if (!isValidDateFormat(contactData.contact_created_date)) {
-        res.status(400).json({
-          success: false,
-          message: "Contact Created Date must be in MM/DD/YYYY format",
-        });
-        return;
-      }
-
-      // Validate positive integers
-      if (!isPositiveInteger(contactData.contact_id)) {
-        res.status(400).json({
-          success: false,
-          message: "Contact ID must be a positive integer",
-        });
-        return;
-      }
-
-      if (!isPositiveInteger(contactData.law_firm_id)) {
-        res.status(400).json({
-          success: false,
-          message: "Law Firm ID must be a positive integer",
-        });
-        return;
-      }
+      const contactData = validation.sanitizedData!;
 
       // Use transaction to prevent race conditions
       await this.dataSource.transaction(async (transactionalEntityManager) => {
@@ -355,7 +173,7 @@ export class ContactsController {
         );
 
         if (!existingContact) {
-          throw new Error("Contact not found");
+          throw new Error(ERROR_MESSAGES.CONTACT_NOT_FOUND);
         }
 
         // If contact_id is being changed, check if new ID already exists
@@ -368,9 +186,7 @@ export class ContactsController {
           );
 
           if (conflictingContact) {
-            throw new Error(
-              `Contact ID ${contactData.contact_id} already exists. Please choose a different ID.`
-            );
+            throw new Error(ERROR_MESSAGES.CONTACT_ID_EXISTS);
           }
 
           // Delete the old record (within transaction)
@@ -380,41 +196,27 @@ export class ContactsController {
         }
 
         // Create/update the contact with new data
-        const contact = transactionalEntityManager.create(Contact, {
-          contact_id: contactData.contact_id,
-          first_name: contactData.first_name,
-          last_name: contactData.last_name,
-          program: contactData.program || null,
-          email_address: contactData.email_address || null,
-          phone: contactData.phone || null,
-          contact_created_date: contactData.contact_created_date || null,
-          action: contactData.action || null,
-          law_firm_id: contactData.law_firm_id || null,
-          law_firm_name: contactData.law_firm_name || null,
-        });
-
+        const contact = transactionalEntityManager.create(Contact, contactData);
         await transactionalEntityManager.save(Contact, contact);
       });
 
-      res.json({
-        success: true,
-        message: `Contact updated successfully${
-          contactData.contact_id !== originalContactId
-            ? ` (ID changed from ${originalContactId} to ${contactData.contact_id})`
-            : ""
-        }`,
-      });
-    } catch (error: any) {
-      console.error("Error updating contact:", error);
-      if (error.message === "Contact not found") {
-        res.status(404).json({ success: false, message: error.message });
-        return;
+      const idChangedText = contactData.contact_id !== originalContactId
+        ? ` (ID changed from ${originalContactId} to ${contactData.contact_id})`
+        : "";
+      ResponseBuilder.success(res, undefined, `Contact updated successfully${idChangedText}`);
+    } catch (error) {
+      // Proper error type checking with type guard (#46)
+      if (error instanceof Error) {
+        if (error.message === ERROR_MESSAGES.CONTACT_NOT_FOUND) {
+          return ResponseBuilder.notFound(res, error.message);
+        }
+        if (error.message === ERROR_MESSAGES.CONTACT_ID_EXISTS) {
+          return ResponseBuilder.conflict(res, error.message);
+        }
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error('An unknown error occurred'));
       }
-      if (error.message?.includes("already exists")) {
-        res.status(409).json({ success: false, message: error.message });
-        return;
-      }
-      res.status(500).json({ success: false, message: "Failed to update contact" });
     }
   }
 
@@ -426,8 +228,7 @@ export class ContactsController {
       const contactId = Number.parseInt(req.params.id, 10);
 
       if (Number.isNaN(contactId)) {
-        res.status(400).json({ success: false, message: "Invalid contact ID" });
-        return;
+        return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
       }
 
       const contactRepository = this.dataSource.getRepository(Contact);
@@ -438,20 +239,15 @@ export class ContactsController {
       });
 
       if (!existingContact) {
-        res.status(404).json({ success: false, message: "Contact not found" });
-        return;
+        return ResponseBuilder.notFound(res, ERROR_MESSAGES.CONTACT_NOT_FOUND);
       }
 
       // Delete the contact
       await contactRepository.delete({ contact_id: contactId });
 
-      res.json({
-        success: true,
-        message: `Contact ID ${contactId} deleted successfully`,
-      });
+      ResponseBuilder.success(res, undefined, `Contact ID ${contactId} deleted successfully`);
     } catch (error) {
-      console.error("Error deleting contact:", error);
-      res.status(500).json({ success: false, message: "Failed to delete contact" });
+      ResponseBuilder.internalError(res, error as Error);
     }
   }
 }

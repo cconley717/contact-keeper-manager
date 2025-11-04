@@ -20,23 +20,3 @@ export interface UpdateContactDto extends CreateContactDto {
 export interface CreateClientDto {
   client_id: number;
 }
-
-export interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-}
-
-export interface ApiErrorResponse {
-  success: false;
-  message: string;
-  error?: string;
-}
-
-export interface PaginatedResponse<T> {
-  success: boolean;
-  data: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-}

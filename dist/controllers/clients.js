@@ -1,4 +1,7 @@
 import { Client } from "../entities/Client.js";
+import { ResponseBuilder } from "../utils/response.js";
+import { ERROR_MESSAGES, HTTP_STATUS } from "../constants.js";
+import { isPositiveInteger } from "../utils/validation.js";
 export class ClientsController {
     dataSource;
     constructor(dataSource) {
@@ -7,17 +10,16 @@ export class ClientsController {
     /**
      * GET /api/clients - Fetch all client IDs
      */
-    async getClients(req, res) {
+    async getClients(_req, res) {
         try {
             const clientRepository = this.dataSource.getRepository(Client);
             const clients = await clientRepository.find({
                 order: { client_id: "ASC" },
             });
-            res.json({ success: true, data: clients });
+            ResponseBuilder.success(res, clients);
         }
         catch (error) {
-            console.error("Error fetching clients:", error);
-            res.status(500).json({ success: false, message: "Failed to fetch clients" });
+            ResponseBuilder.internalError(res, error);
         }
     }
     /**
@@ -27,19 +29,8 @@ export class ClientsController {
         try {
             const { client_id } = req.body;
             // Validate client_id
-            if (!client_id ||
-                typeof client_id !== "number" ||
-                !Number.isInteger(client_id)) {
-                res
-                    .status(400)
-                    .json({ success: false, message: "Client ID must be an integer" });
-                return;
-            }
-            if (client_id <= 0) {
-                res
-                    .status(400)
-                    .json({ success: false, message: "Client ID must be positive" });
-                return;
+            if (!isPositiveInteger(client_id)) {
+                return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
             }
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client_id already exists
@@ -47,23 +38,15 @@ export class ClientsController {
                 where: { client_id },
             });
             if (existingClient) {
-                res
-                    .status(400)
-                    .json({ success: false, message: "Client ID already exists" });
-                return;
+                return ResponseBuilder.badRequest(res, ERROR_MESSAGES.CLIENT_ID_EXISTS);
             }
             // Create and save new client
             const newClient = clientRepository.create({ client_id });
             await clientRepository.save(newClient);
-            res.status(201).json({
-                success: true,
-                message: "Client ID added successfully",
-                data: newClient,
-            });
+            ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);
         }
         catch (error) {
-            console.error("Error adding client:", error);
-            res.status(500).json({ success: false, message: "Failed to add client" });
+            ResponseBuilder.internalError(res, error);
         }
     }
     /**
@@ -73,8 +56,7 @@ export class ClientsController {
         try {
             const clientId = Number.parseInt(req.params.id);
             if (Number.isNaN(clientId)) {
-                res.status(400).json({ success: false, message: "Invalid client ID" });
-                return;
+                return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
             }
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client exists
@@ -82,19 +64,14 @@ export class ClientsController {
                 where: { id: clientId },
             });
             if (!existingClient) {
-                res.status(404).json({ success: false, message: "Client ID not found" });
-                return;
+                return ResponseBuilder.notFound(res, ERROR_MESSAGES.CLIENT_NOT_FOUND);
             }
             // Delete the client
             await clientRepository.delete({ id: clientId });
-            res.json({
-                success: true,
-                message: `Client ID ${existingClient.client_id} deleted successfully`,
-            });
+            ResponseBuilder.success(res, undefined, `Client ID ${existingClient.client_id} deleted successfully`);
         }
         catch (error) {
-            console.error("Error deleting client:", error);
-            res.status(500).json({ success: false, message: "Failed to delete client" });
+            ResponseBuilder.internalError(res, error);
         }
     }
 }

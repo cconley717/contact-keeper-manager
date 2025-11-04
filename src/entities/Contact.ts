@@ -13,6 +13,7 @@ export class Contact {
   @Column('text', { nullable: true })
   last_name: string | null = null;
 
+  @Index()
   @Column('text', { nullable: true })
   program: string | null = null;
 
@@ -20,6 +21,7 @@ export class Contact {
   @Column('text', { nullable: true })
   email_address: string | null = null;
 
+  @Index()
   @Column('text', { nullable: true })
   phone: string | null = null;
 
@@ -27,6 +29,7 @@ export class Contact {
   @Column('text', { nullable: true })
   contact_created_date: string | null = null;
 
+  @Index()
   @Column('text', { nullable: true })
   action: string | null = null;
 
@@ -34,6 +37,7 @@ export class Contact {
   @Column('integer', { nullable: true })
   law_firm_id: number | null = null;
 
+  @Index()
   @Column('text', { nullable: true })
   law_firm_name: string | null = null;
 }

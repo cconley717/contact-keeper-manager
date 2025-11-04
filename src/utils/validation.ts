@@ -23,11 +23,24 @@ export function isValidDateFormat(dateStr: string): boolean {
   const date = new Date(year, month - 1, day);
   
   // Check if date is valid and matches input
-  return (
+  // This catches invalid dates like 2/31/2024
+  const isValid = (
     date.getFullYear() === year &&
     date.getMonth() === month - 1 &&
     date.getDate() === day
   );
+  
+  if (!isValid) {
+    return false;
+  }
+  
+  // Additional validation: check days per month
+  const daysInMonth = new Date(year, month, 0).getDate();
+  if (day > daysInMonth) {
+    return false;
+  }
+  
+  return true;
 }
 
 /**
