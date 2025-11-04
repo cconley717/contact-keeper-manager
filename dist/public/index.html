@@ -488,15 +488,21 @@
       let totalRowCount = 0;
       let currentServerPage = 0;
 
-      // Search functionality
+      // Search functionality with debouncing
       const searchInput = document.getElementById("searchInput");
       const searchBtn = document.getElementById("searchBtn");
       const clearSearchBtn = document.getElementById("clearSearchBtn");
+      
+      let searchDebounceTimer = null;
 
-      searchBtn.addEventListener("click", function () {
+      function performSearch() {
         currentSearch = searchInput.value.trim();
         currentServerPage = 0;
         loadData();
+      }
+
+      searchBtn.addEventListener("click", function () {
+        performSearch();
       });
 
       clearSearchBtn.addEventListener("click", function () {
@@ -506,10 +512,23 @@
         loadData();
       });
 
-      // Allow Enter key to search
+      // Debounced search on typing (300ms delay)
+      searchInput.addEventListener("input", function () {
+        if (searchDebounceTimer) {
+          clearTimeout(searchDebounceTimer);
+        }
+        searchDebounceTimer = setTimeout(() => {
+          performSearch();
+        }, 300);
+      });
+
+      // Allow Enter key to search immediately
       searchInput.addEventListener("keypress", function (e) {
         if (e.key === "Enter") {
-          searchBtn.click();
+          if (searchDebounceTimer) {
+            clearTimeout(searchDebounceTimer);
+          }
+          performSearch();
         }
       });
 
@@ -554,7 +573,8 @@
       async function loadClients() {
         try {
           const response = await fetch("/api/clients");
-          const clients = await response.json();
+          const result = await response.json();
+          const clients = result.data || result;
 
           // Populate the output table dropdown
           const outputSelect = document.getElementById("outputClientIdSelect");
@@ -612,12 +632,13 @@
       const addClientMessage = document.getElementById("addClientMessage");
       const newClientIdInput = document.getElementById("newClientIdInput");
 
-      // Helper function to show client messages with auto-dismiss
-      function showClientMessage(message, type) {
-        addClientMessage.innerHTML = `<p class="message message--${type}">${message}</p>`;
+      // Helper function to show messages with auto-dismiss
+      function showMessage(elementId, message, type, timeout = 3000) {
+        const element = document.getElementById(elementId);
+        element.innerHTML = `<div class="message message--${type}">${message}</div>`;
         setTimeout(() => {
-          addClientMessage.innerHTML = "";
-        }, 3000);
+          element.innerHTML = "";
+        }, timeout);
       }
 
       addClientIdBtn.addEventListener("click", async function () {
@@ -625,7 +646,7 @@
 
         // Validation
         if (!clientId || clientId <= 0) {
-          showClientMessage("Please enter a positive client ID", "error");
+          showMessage("addClientMessage", "Please enter a positive client ID", "error");
           return;
         }
 
@@ -642,15 +663,37 @@
           const data = await response.json();
 
           if (response.ok) {
-            showClientMessage(data.message, "success");
+            showMessage("addClientMessage", data.message, "success");
             newClientIdInput.value = "";
-            await loadClients(); // Refresh the list and dropdown
+            
+            // Add new client to dropdown and list without refetching
+            const newClient = data.data;
+            const outputSelect = document.getElementById("outputClientIdSelect");
+            const option = document.createElement("option");
+            option.value = newClient.client_id;
+            option.textContent = newClient.client_id;
+            
+            // Insert in sorted position
+            let inserted = false;
+            for (let i = 1; i < outputSelect.options.length; i++) {
+              if (Number.parseInt(outputSelect.options[i].value) > newClient.client_id) {
+                outputSelect.insertBefore(option, outputSelect.options[i]);
+                inserted = true;
+                break;
+              }
+            }
+            if (!inserted) {
+              outputSelect.appendChild(option);
+            }
+            
+            // Refresh the client list display
+            await loadClients();
           } else {
-            showClientMessage(data.error || "Failed to add client ID", "error");
+            showMessage("addClientMessage", data.message || "Failed to add client ID", "error");
           }
         } catch (error) {
           console.error("Error adding client:", error);
-          showClientMessage("Failed to add client ID. Please try again.", "error");
+          showMessage("addClientMessage", "Failed to add client ID. Please try again.", "error");
         } finally {
           addClientIdBtn.disabled = false;
           addClientIdBtn.textContent = "Add Client ID";
@@ -671,14 +714,14 @@
           const data = await response.json();
 
           if (response.ok) {
-            showClientMessage(data.message, "success");
+            showMessage("addClientMessage", data.message, "success");
             await loadClients(); // Refresh the list and dropdown
           } else {
-            showClientMessage(data.error || "Failed to delete client ID", "error");
+            showMessage("addClientMessage", data.message || "Failed to delete client ID", "error");
           }
         } catch (error) {
           console.error("Error deleting client:", error);
-          showClientMessage("Failed to delete client ID. Please try again.", "error");
+          showMessage("addClientMessage", "Failed to delete client ID. Please try again.", "error");
         }
       }
 
@@ -696,7 +739,7 @@
         }
 
         try {
-          const response = await fetch(`/api/contact/${contactId}`, {
+          const response = await fetch(`/api/contacts/${contactId}`, {
             method: "DELETE",
           });
 
@@ -706,7 +749,7 @@
             // Refresh grid
             loadData();
           } else {
-            alert(data.error || "Failed to delete contact");
+            alert(data.message || "Failed to delete contact");
           }
         } catch (error) {
           console.error("Error deleting contact:", error);
@@ -787,7 +830,7 @@
         }
 
         try {
-          const response = await fetch(`/api/contact/${originalContactId}`, {
+          const response = await fetch(`/api/contacts/${originalContactId}`, {
             method: "PUT",
             headers: {
               "Content-Type": "application/json",
@@ -801,7 +844,7 @@
             closeUpdateModal();
             loadData();
           } else {
-            alert(data.error || "Failed to update contact");
+            alert(data.message || "Failed to update contact");
           }
         } catch (error) {
           console.error("Error updating contact:", error);
@@ -810,12 +853,11 @@
       }
 
       // Close modal when clicking outside of it
-      globalThis.onclick = function (event) {
-        const modal = document.getElementById("updateModal");
-        if (event.target === modal) {
+      document.getElementById("updateModal").addEventListener("click", function (event) {
+        if (event.target === event.currentTarget) {
           closeUpdateModal();
         }
-      };
+      });
 
       // Load data from server with server-side pagination
       async function loadData() {
@@ -924,7 +966,8 @@
           !contactData.law_firm_id ||
           !contactData.law_firm_name
         ) {
-          showAddContactMessage(
+          showMessage(
+            "addContactMessage",
             "Contact ID, First Name, Last Name, Email Address, Contact Created Date, Law Firm ID, and Law Firm Name are required",
             "error"
           );
@@ -935,7 +978,7 @@
         addContactBtn.textContent = "Adding...";
 
         try {
-          const response = await fetch("/api/contact", {
+          const response = await fetch("/api/contacts", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -946,7 +989,7 @@
           const data = await response.json();
 
           if (response.ok) {
-            showAddContactMessage(data.message, "success");
+            showMessage("addContactMessage", data.message, "success");
 
             // Clear form
             document.getElementById("newContactId").value = "";
@@ -964,29 +1007,16 @@
             currentServerPage = 0;
             loadData();
           } else {
-            showAddContactMessage(
-              data.error || "Failed to add contact",
-              "error"
-            );
+            showMessage("addContactMessage", data.message || "Failed to add contact", "error");
           }
         } catch (error) {
           console.error("Error adding contact:", error);
-          showAddContactMessage(
-            "Failed to add contact. Please try again.",
-            "error"
-          );
+          showMessage("addContactMessage", "Failed to add contact. Please try again.", "error");
         } finally {
           addContactBtn.disabled = false;
           addContactBtn.textContent = "Add Contact";
         }
       });
-
-      function showAddContactMessage(message, type) {
-        addContactMessage.innerHTML = `<div class="message message--${type}">${message}</div>`;
-        setTimeout(() => {
-          addContactMessage.innerHTML = "";
-        }, 3000);
-      }
 
       // File upload functionality
       const uploadBtn = document.getElementById("uploadBtn");
@@ -1014,7 +1044,7 @@
         uploadMessage.innerHTML = "";
 
         try {
-          const response = await fetch("/api/upload", {
+          const response = await fetch("/api/contacts/upload", {
             method: "POST",
             body: formData,
           });
@@ -1022,30 +1052,23 @@
           const data = await response.json();
 
           if (response.ok) {
-            showMessage(data.message, "success");
+            showMessage("uploadMessage", data.message, "success");
             csvFile.value = "";
 
             // Refresh grid
             currentPage = 0;
             loadData();
           } else {
-            showMessage(data.error || "Upload failed", "error");
+            showMessage("uploadMessage", data.message || "Upload failed", "error");
           }
         } catch (error) {
           console.error("Upload error:", error);
-          showMessage("Upload failed. Please try again.", "error");
+          showMessage("uploadMessage", "Upload failed. Please try again.", "error");
         } finally {
           uploadBtn.disabled = false;
           uploadBtn.textContent = "Upload & Import";
         }
       });
-
-      function showMessage(message, type) {
-        uploadMessage.innerHTML = `<div class="message message--${type}">${message}</div>`;
-        setTimeout(() => {
-          uploadMessage.innerHTML = "";
-        }, 3000);
-      }
 
       // Copy Output Table to Clipboard
       const copyOutputBtn = document.getElementById("copyOutputBtn");
