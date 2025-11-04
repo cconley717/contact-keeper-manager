@@ -19,10 +19,11 @@ const upload = multer({
         fileSize: 10 * 1024 * 1024, // 10MB limit
     },
 });
-// Initialize TypeORM DataSource
+// Initialize TypeORM DataSource with sql.js
 const AppDataSource = new DataSource({
-    type: "better-sqlite3",
-    database: path.join(__dirname, "contacts.db"), // Database in dist folder
+    type: "sqljs",
+    location: path.join(__dirname, "contacts.db"), // Database in dist folder
+    autoSave: true, // Auto-save to disk after changes
     synchronize: true,
     logging: false,
     entities: [Contact],
