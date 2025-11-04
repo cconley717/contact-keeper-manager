@@ -9,32 +9,15 @@ import { Client } from "./entities/Client.js";
 import { createContactsRouter } from "./routes/contacts.js";
 import { createClientsRouter } from "./routes/clients.js";
 import { SERVER_CONFIG, CSV_CONFIG } from "./constants.js";
+import { validatePort } from "./utils/validation.js";
 
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Validate and parse PORT environment variable (#6)
-function validatePort(portValue: string | undefined): number {
-  if (!portValue) {
-    return SERVER_CONFIG.DEFAULT_PORT;
-  }
-
-  const port = Number.parseInt(portValue, 10);
-
-  if (Number.isNaN(port) || port < 1 || port > 65535) {
-    console.error(
-      `Invalid PORT value: ${portValue}. Using default port ${SERVER_CONFIG.DEFAULT_PORT}`
-    );
-    return SERVER_CONFIG.DEFAULT_PORT;
-  }
-
-  return port;
-}
-
 // Create Express app
 const app = express();
-const PORT = validatePort(process.env.PORT);
+const PORT = validatePort(process.env.PORT, SERVER_CONFIG.DEFAULT_PORT);
 
 // Configure multer for in-memory file uploads (no file system writes)
 const upload = multer({

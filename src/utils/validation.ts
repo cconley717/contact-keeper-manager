@@ -41,10 +41,30 @@ export function isValidDateFormat(dateStr: string): boolean {
 }
 
 /**
- * Validates positive integer
- * @param value - Value to validate
- * @returns true if positive integer, false otherwise
+ * Validate if a value is a positive integer (#56, #57, #59)
  */
 export function isPositiveInteger(value: any): boolean {
-  return typeof value === "number" && Number.isInteger(value) && value > 0;
+  const num = Number.parseInt(String(value), 10);
+  return !Number.isNaN(num) && num > 0 && num === Number(value);
+}
+
+/**
+ * Validates and parses PORT environment variable
+ * @param portValue - Port value from environment variable
+ * @param defaultPort - Default port to use if validation fails
+ * @returns Valid port number
+ */
+export function validatePort(portValue: string | undefined, defaultPort: number): number {
+  if (!portValue) {
+    return defaultPort;
+  }
+
+  const port = Number.parseInt(portValue, 10);
+
+  if (Number.isNaN(port) || port < 1 || port > 65535) {
+    console.error(`Invalid PORT value: ${portValue}. Using default port ${defaultPort}`);
+    return defaultPort;
+  }
+
+  return port;
 }

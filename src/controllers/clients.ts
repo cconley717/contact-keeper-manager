@@ -20,7 +20,11 @@ export class ClientsController {
       });
       ResponseBuilder.success(res, clients);
     } catch (error) {
-      ResponseBuilder.internalError(res, error as Error);
+      if (error instanceof Error) {
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+      }
     }
   }
 
@@ -53,7 +57,11 @@ export class ClientsController {
 
       ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);
     } catch (error) {
-      ResponseBuilder.internalError(res, error as Error);
+      if (error instanceof Error) {
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+      }
     }
   }
 
@@ -62,9 +70,10 @@ export class ClientsController {
    */
   async deleteClient(req: Request, res: Response): Promise<void> {
     try {
-      const clientId = Number.parseInt(req.params.id);
+      const id = Number.parseInt(req.params.id, 10);
 
-      if (Number.isNaN(clientId)) {
+      // Validate ID using consistent helper function
+      if (!isPositiveInteger(id)) {
         return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
       }
 
@@ -72,7 +81,7 @@ export class ClientsController {
 
       // Check if client exists
       const existingClient = await clientRepository.findOne({
-        where: { id: clientId },
+        where: { id },
       });
 
       if (!existingClient) {
@@ -80,7 +89,7 @@ export class ClientsController {
       }
 
       // Delete the client
-      await clientRepository.delete({ id: clientId });
+      await clientRepository.delete({ id });
 
       ResponseBuilder.success(
         res,
@@ -88,7 +97,11 @@ export class ClientsController {
         `Client ID ${existingClient.client_id} deleted successfully`
       );
     } catch (error) {
-      ResponseBuilder.internalError(res, error as Error);
+      if (error instanceof Error) {
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+      }
     }
   }
 }

@@ -19,7 +19,12 @@ export class ClientsController {
             ResponseBuilder.success(res, clients);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
     /**
@@ -46,7 +51,12 @@ export class ClientsController {
             ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
     /**
@@ -54,24 +64,30 @@ export class ClientsController {
      */
     async deleteClient(req, res) {
         try {
-            const clientId = Number.parseInt(req.params.id);
-            if (Number.isNaN(clientId)) {
+            const id = Number.parseInt(req.params.id, 10);
+            // Validate ID using consistent helper function
+            if (!isPositiveInteger(id)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CLIENT_ID);
             }
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client exists
             const existingClient = await clientRepository.findOne({
-                where: { id: clientId },
+                where: { id },
             });
             if (!existingClient) {
                 return ResponseBuilder.notFound(res, ERROR_MESSAGES.CLIENT_NOT_FOUND);
             }
             // Delete the client
-            await clientRepository.delete({ id: clientId });
+            await clientRepository.delete({ id });
             ResponseBuilder.success(res, undefined, `Client ID ${existingClient.client_id} deleted successfully`);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
 }

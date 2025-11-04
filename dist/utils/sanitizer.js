@@ -36,7 +36,7 @@ export class InputSanitizer {
         return validator.normalizeEmail(trimmed) || trimmed;
     }
     /**
-     * Sanitize a phone number (allow digits, spaces, hyphens, parentheses, plus)
+     * Sanitize and validate phone format (#41)
      */
     static sanitizePhone(phone) {
         if (!phone)
@@ -78,17 +78,19 @@ export class InputSanitizer {
      * Sanitize an object by applying appropriate sanitization to each field
      */
     static sanitizeContactData(data) {
+        // Type guard to ensure data is an object
+        const obj = data;
         return {
-            contact_id: this.sanitizeInteger(data.contact_id),
-            first_name: this.sanitizeString(data.first_name),
-            last_name: this.sanitizeString(data.last_name),
-            program: this.sanitizeString(data.program),
-            email_address: this.sanitizeEmail(data.email_address),
-            phone: this.sanitizePhone(data.phone),
-            contact_created_date: this.sanitizeDate(data.contact_created_date),
-            action: this.sanitizeString(data.action),
-            law_firm_id: this.sanitizeInteger(data.law_firm_id),
-            law_firm_name: this.sanitizeString(data.law_firm_name),
+            contact_id: this.sanitizeInteger(obj.contact_id),
+            first_name: this.sanitizeString(obj.first_name),
+            last_name: this.sanitizeString(obj.last_name),
+            program: this.sanitizeString(obj.program),
+            email_address: this.sanitizeEmail(obj.email_address),
+            phone: this.sanitizePhone(obj.phone),
+            contact_created_date: this.sanitizeDate(obj.contact_created_date),
+            action: this.sanitizeString(obj.action),
+            law_firm_id: this.sanitizeInteger(obj.law_firm_id),
+            law_firm_name: this.sanitizeString(obj.law_firm_name),
         };
     }
 }

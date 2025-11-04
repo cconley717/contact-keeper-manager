@@ -20,13 +20,13 @@ export interface ContactValidationResult {
 }
 
 /**
- * Shared validation logic for contact data
+ * Validate and sanitize contact data for create/update operations
  */
-export function validateContactData(rawData: any): ContactValidationResult {
+export function validateContactData(data: any): ContactValidationResult {
   const errors: string[] = [];
 
   // Sanitize all input fields
-  const sanitized = InputSanitizer.sanitizeContactData(rawData);
+  const sanitized = InputSanitizer.sanitizeContactData(data);
 
   // Validate required fields exist
   if (!sanitized.contact_id) {

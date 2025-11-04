@@ -1,6 +1,9 @@
 import type { Response } from "express";
 import { HTTP_STATUS, ERROR_MESSAGES } from "../constants.js";
 
+/**
+ * Standard API response structure
+ */
 export interface ApiResponse<T = any> {
   success: boolean;
   message?: string;

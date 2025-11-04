@@ -3,6 +3,7 @@ import { ResponseBuilder } from "../utils/response.js";
 import { validateContactData } from "../utils/contactValidator.js";
 import { CsvService } from "../services/csvService.js";
 import { PAGINATION, ERROR_MESSAGES, VALIDATION } from "../constants.js";
+import { isPositiveInteger } from "../utils/validation.js";
 export class ContactsController {
     dataSource;
     csvService;
@@ -15,8 +16,8 @@ export class ContactsController {
      */
     async getContacts(req, res) {
         try {
-            const page = Number.parseInt(req.query.page) || 0;
-            const pageSize = Math.min(Number.parseInt(req.query.pageSize) || PAGINATION.DEFAULT_PAGE_SIZE, PAGINATION.MAX_PAGE_SIZE);
+            const page = Number.parseInt(req.query.page, 10) || 0;
+            const pageSize = Math.min(Number.parseInt(req.query.pageSize, 10) || PAGINATION.DEFAULT_PAGE_SIZE, PAGINATION.MAX_PAGE_SIZE);
             const search = req.query.search || "";
             // Validate sortField against whitelist to prevent SQL injection (#38)
             const requestedSortField = req.query.sortField || "contact_id";
@@ -62,7 +63,12 @@ export class ContactsController {
             ResponseBuilder.paginated(res, contacts, totalCount, page, pageSize);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
     /**
@@ -86,7 +92,12 @@ export class ContactsController {
             }, message);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
     /**
@@ -118,7 +129,12 @@ export class ContactsController {
             }
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
     /**
@@ -126,8 +142,9 @@ export class ContactsController {
      */
     async updateContact(req, res) {
         try {
-            const originalContactId = Number.parseInt(req.params.id, 10);
-            if (Number.isNaN(originalContactId)) {
+            const contactId = Number.parseInt(req.params.id, 10);
+            // Validate ID using consistent helper function
+            if (!isPositiveInteger(contactId)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
             }
             // Validate and sanitize input (#3, #7, #15)
@@ -140,13 +157,13 @@ export class ContactsController {
             await this.dataSource.transaction(async (transactionalEntityManager) => {
                 // Check if original contact exists
                 const existingContact = await transactionalEntityManager.findOne(Contact, {
-                    where: { contact_id: originalContactId },
+                    where: { contact_id: contactId },
                 });
                 if (!existingContact) {
                     throw new Error(ERROR_MESSAGES.CONTACT_NOT_FOUND);
                 }
                 // If contact_id is being changed, check if new ID already exists
-                if (contactData.contact_id !== originalContactId) {
+                if (contactData.contact_id !== contactId) {
                     const conflictingContact = await transactionalEntityManager.findOne(Contact, {
                         where: { contact_id: contactData.contact_id },
                     });
@@ -155,15 +172,15 @@ export class ContactsController {
                     }
                     // Delete the old record (within transaction)
                     await transactionalEntityManager.delete(Contact, {
-                        contact_id: originalContactId,
+                        contact_id: contactId,
                     });
                 }
                 // Create/update the contact with new data
                 const contact = transactionalEntityManager.create(Contact, contactData);
                 await transactionalEntityManager.save(Contact, contact);
             });
-            const idChangedText = contactData.contact_id !== originalContactId
-                ? ` (ID changed from ${originalContactId} to ${contactData.contact_id})`
+            const idChangedText = contactData.contact_id !== contactId
+                ? ` (ID changed from ${contactId} to ${contactData.contact_id})`
                 : "";
             ResponseBuilder.success(res, undefined, `Contact updated successfully${idChangedText}`);
         }
@@ -189,7 +206,8 @@ export class ContactsController {
     async deleteContact(req, res) {
         try {
             const contactId = Number.parseInt(req.params.id, 10);
-            if (Number.isNaN(contactId)) {
+            // Validate ID using consistent helper function
+            if (!isPositiveInteger(contactId)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
             }
             const contactRepository = this.dataSource.getRepository(Contact);
@@ -205,7 +223,12 @@ export class ContactsController {
             ResponseBuilder.success(res, undefined, `Contact ID ${contactId} deleted successfully`);
         }
         catch (error) {
-            ResponseBuilder.internalError(res, error);
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
         }
     }
 }

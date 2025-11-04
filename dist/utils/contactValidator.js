@@ -2,12 +2,12 @@ import { InputSanitizer } from "./sanitizer.js";
 import { isValidDateFormat, isPositiveInteger } from "./validation.js";
 import { ERROR_MESSAGES } from "../constants.js";
 /**
- * Shared validation logic for contact data
+ * Validate and sanitize contact data for create/update operations
  */
-export function validateContactData(rawData) {
+export function validateContactData(data) {
     const errors = [];
     // Sanitize all input fields
-    const sanitized = InputSanitizer.sanitizeContactData(rawData);
+    const sanitized = InputSanitizer.sanitizeContactData(data);
     // Validate required fields exist
     if (!sanitized.contact_id) {
         errors.push("Contact ID is required");
