@@ -313,6 +313,16 @@
               </td>
             </tr>
             <tr>
+              <th>Outreach</th>
+              <td>
+                <select data-field="outreach">
+                  <option value=""></option>
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
               <th>Communication Method</th>
               <td>
                 <select data-field="communication_method">
@@ -1044,7 +1054,7 @@
         try {
           // Get all the field values from the output table
           const clientId = document.querySelector(
-            '.output-section input[data-field="client_id"]'
+            '.output-section select[data-field="client_id"]'
           ).value;
           const contactId = document.querySelector(
             '.output-section input[data-field="contact_id"]'
@@ -1060,6 +1070,9 @@
           ).value;
           const inboundOutbound = document.querySelector(
             '.output-section select[data-field="inbound_outbound"]'
+          ).value;
+          const outreach = document.querySelector(
+            '.output-section select[data-field="outreach"]'
           ).value;
           const commMethod = document.querySelector(
             '.output-section select[data-field="communication_method"]'
@@ -1097,6 +1110,10 @@
       <td style="border: 1px solid #000; padding: 4px;">${inboundOutbound}</td>
     </tr>
     <tr>
+      <td style="border: 1px solid #000; padding: 4px;">Outreach</td>
+      <td style="border: 1px solid #000; padding: 4px;">${outreach}</td>
+    </tr>
+    <tr>
       <td style="border: 1px solid #000; padding: 4px;">Communication Method</td>
       <td style="border: 1px solid #000; padding: 4px;">${commMethod}</td>
     </tr>
@@ -1115,6 +1132,7 @@
             ["Firm ID(s)", firmId],
             ["Claimant ID(s)", claimantId],
             ["Inbound/Outbound", inboundOutbound],
+            ["Outreach", outreach],
             ["Communication Method", commMethod],
             ["Start of Message:", message],
           ]
