@@ -39,17 +39,17 @@ export class ClientsController {
             if (!validation.isValid) {
                 return ResponseBuilder.badRequest(res, validation.errors.join(", "));
             }
-            const { client_id } = validation.sanitizedData;
+            const sanitizedData = validation.sanitizedData;
             const clientRepository = this.dataSource.getRepository(Client);
             // Check if client_id already exists
             const existingClient = await clientRepository.findOne({
-                where: { client_id },
+                where: { client_id: sanitizedData.client_id },
             });
             if (existingClient) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.CLIENT_ID_EXISTS);
             }
             // Create and save new client
-            const newClient = clientRepository.create({ client_id });
+            const newClient = clientRepository.create({ client_id: sanitizedData.client_id });
             await clientRepository.save(newClient);
             ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);
         }
