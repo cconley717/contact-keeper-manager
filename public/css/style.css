@@ -1,0 +1,510 @@
+/* ============================================
+   CONTACT KEEPER MANAGER - STYLESHEET
+   Following SOLID CSS Principles:
+   - Single Responsibility: Each class has one purpose
+   - Open/Closed: Extendable via composition
+   - Liskov Substitution: Consistent naming conventions
+   - Interface Segregation: Specific utility classes
+   - Dependency Inversion: Reusable components
+   ============================================ */
+
+/* === BASE STYLES === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+/* === LAYOUT === */
+.container {
+  width: 80%;
+  margin: 0 auto;
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* === TYPOGRAPHY === */
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #555;
+}
+
+.section-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.section-title--small {
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #000;
+  font-weight: bold;
+}
+
+/* === SECTIONS === */
+.upload-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.grid-section {
+  margin-bottom: 40px;
+}
+
+.output-section {
+  margin-top: 40px;
+}
+
+/* === FORMS === */
+.file-input-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+input[type="file"] {
+  flex: 1;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.form-input--readonly {
+  background-color: #f0f0f0;
+}
+
+/* === BUTTONS === */
+button {
+  padding: 8px 20px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #007bff;
+}
+
+.btn-primary:hover {
+  background: #0056b3;
+}
+
+.btn-success {
+  background-color: #28a745;
+}
+
+.btn-success:hover {
+  background-color: #218838;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+.btn-info--copied {
+  background-color: #28a745;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #000000;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-large {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.btn-small {
+  padding: 4px 12px;
+}
+
+/* === GRID ACTION BUTTONS === */
+.select-btn {
+  padding: 4px 12px;
+  cursor: pointer;
+  margin-right: 5px;
+  background: #004ea1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.update-btn {
+  padding: 4px 12px;
+  cursor: pointer;
+  margin-right: 5px;
+  background-color: rgb(189, 59, 27);
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.delete-btn {
+  padding: 4px 12px;
+  cursor: pointer;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+/* === MESSAGES === */
+.message {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.message--success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message--error {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* === SEARCH BAR === */
+.search-bar {
+  margin-bottom: 15px;
+}
+
+.search-input {
+  width: 300px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  padding: 8px 16px;
+  margin-left: 10px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: #000000;
+  border: none;
+  border-radius: 4px;
+}
+
+.search-button--clear {
+  padding: 8px 16px;
+  margin-left: 5px;
+  cursor: pointer;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+/* === DATA GRID === */
+#dataGrid {
+  height: 500px;
+  width: 100%;
+}
+
+/* === OUTPUT TABLE === */
+.output-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.output-header__title {
+  margin: 0;
+}
+
+.output-table {
+  width: auto;
+  border-collapse: collapse;
+}
+
+.output-table th {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+  white-space: nowrap;
+  background-color: #fff;
+  font-weight: bold;
+  color: #000;
+  font-size: 12px;
+}
+
+.output-table td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+.output-table input,
+.output-table select {
+  width: 100%;
+  padding: 4px;
+  border: none;
+  font-size: 12px;
+  background: transparent;
+}
+
+.output-table input:focus,
+.output-table select:focus {
+  outline: none;
+}
+
+/* === COLLAPSIBLE SECTION === */
+.collapsible-header {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+}
+
+.collapsible-icon {
+  margin-right: 8px;
+}
+
+.collapsible-content {
+  display: none;
+}
+
+.collapsible-content--visible {
+  display: block;
+}
+
+/* === MODAL === */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal--visible {
+  display: block;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 8px;
+  width: 700px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.modal-header h2 {
+  margin: 0;
+}
+
+.modal-close {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 20px;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+  color: #000;
+}
+
+.modal-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.modal-form-grid label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.modal-form-grid input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* === PAGINATION === */
+.pagination-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-info {
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.pagination-controls span {
+  margin: 0 10px;
+}
+
+/* === CLIPBOARD TABLE === */
+.clipboard-table {
+  border: 1px solid #000;
+  border-collapse: collapse;
+}
+
+.clipboard-table td {
+  border: 1px solid #000;
+  padding: 4px;
+}
+
+/* === UTILITY CLASSES === */
+.ml-10 {
+  margin-left: 10px;
+}
+
+.ml-5 {
+  margin-left: 5px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mr-8 {
+  margin-right: 8px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.mb-15 {
+  margin-bottom: 15px;
+}
+
+.m-0 {
+  margin: 0;
+}
+
+.w-300 {
+  width: 300px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hidden {
+  display: none;
+}
