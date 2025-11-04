@@ -115,85 +115,118 @@
         <div id="uploadMessage"></div>
       </div>
 
-      <!-- Add New Contact Section -->
-      <div class="upload-section">
-        <h2 class="collapsible-header" id="addContactToggle">
-          <span id="addContactIcon" class="collapsible-icon">▶</span>
-          Add New Contact
-        </h2>
-        <div id="addContactForm" class="collapsible-content">
-          <div class="form-grid">
-            <div class="form-field">
-              <label class="form-label" for="newContactId">Contact ID *</label>
-              <input
-                type="number"
-                id="newContactId"
-                class="form-input"
-                required
-              />
+      <!-- Add New Contact and Client ID Management (Side-by-Side) -->
+      <div class="side-by-side-container">
+        <!-- Add New Contact Section -->
+        <div class="side-by-side-item">
+          <h2 class="collapsible-header" id="addContactToggle">
+            <span id="addContactIcon" class="collapsible-icon">▶</span>
+            Add New Contact
+          </h2>
+          <div id="addContactForm" class="collapsible-content">
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-label" for="newContactId">Contact ID *</label>
+                <input
+                  type="number"
+                  id="newContactId"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newFirstName">First Name *</label>
+                <input
+                  type="text"
+                  id="newFirstName"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newLastName">Last Name *</label>
+                <input type="text" id="newLastName" class="form-input" required />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newProgram">Program</label>
+                <input type="text" id="newProgram" class="form-input" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newEmail">Email Address *</label>
+                <input type="email" id="newEmail" class="form-input" required />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newPhone">Phone</label>
+                <input type="text" id="newPhone" class="form-input" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newCreatedDate">Contact Created Date *</label>
+                <input
+                  type="text"
+                  id="newCreatedDate"
+                  class="form-input"
+                  placeholder="MM/DD/YYYY"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newAction">Action</label>
+                <input type="text" id="newAction" class="form-input" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
+                <input
+                  type="number"
+                  id="newLawFirmId"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
+                <input
+                  type="text"
+                  id="newLawFirmName"
+                  class="form-input"
+                  required
+                />
+              </div>
             </div>
-            <div class="form-field">
-              <label class="form-label" for="newFirstName">First Name *</label>
-              <input
-                type="text"
-                id="newFirstName"
-                class="form-input"
-                required
-              />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newLastName">Last Name *</label>
-              <input type="text" id="newLastName" class="form-input" required />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newProgram">Program</label>
-              <input type="text" id="newProgram" class="form-input" />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newEmail">Email Address *</label>
-              <input type="email" id="newEmail" class="form-input" required />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newPhone">Phone</label>
-              <input type="text" id="newPhone" class="form-input" />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newCreatedDate">Contact Created Date *</label>
-              <input
-                type="text"
-                id="newCreatedDate"
-                class="form-input"
-                placeholder="MM/DD/YYYY"
-                required
-              />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newAction">Action</label>
-              <input type="text" id="newAction" class="form-input" />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
-              <input
-                type="number"
-                id="newLawFirmId"
-                class="form-input"
-                required
-              />
-            </div>
-            <div class="form-field">
-              <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
-              <input
-                type="text"
-                id="newLawFirmName"
-                class="form-input"
-                required
-              />
-            </div>
+            <button id="addContactBtn" class="btn-success btn-large">
+              Add Contact
+            </button>
+            <div id="addContactMessage"></div>
           </div>
-          <button id="addContactBtn" class="btn-success btn-large">
-            Add Contact
-          </button>
-          <div id="addContactMessage"></div>
+        </div>
+
+        <!-- Add Client ID Section -->
+        <div class="side-by-side-item">
+          <h2 class="collapsible-header" id="addClientToggle">
+            <span id="addClientIcon" class="collapsible-icon">▶</span>
+            Manage Client IDs
+          </h2>
+          <div id="addClientForm" class="collapsible-content">
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-label" for="newClientIdInput">Client ID *</label>
+                <input
+                  type="number"
+                  id="newClientIdInput"
+                  class="form-input"
+                  min="1"
+                  step="1"
+                  required
+                />
+              </div>
+            </div>
+            <button id="addClientIdBtn" class="btn-success btn-large">
+              Add Client ID
+            </button>
+            <div id="addClientMessage"></div>
+            
+            <!-- List of existing client IDs -->
+            <div id="clientIdList" class="client-list"></div>
+          </div>
         </div>
       </div>
 
@@ -223,7 +256,7 @@
           <tbody>
             <tr>
               <th>Client ID</th>
-              <td><input type="text" data-field="client_id" /></td>
+              <td><select data-field="client_id" id="outputClientIdSelect"></select></td>
             </tr>
             <tr>
               <th>Contact ID</th>
@@ -493,6 +526,155 @@
           : "▶";
       });
 
+      // Toggle Add Client ID form
+      const addClientToggle = document.getElementById("addClientToggle");
+      const addClientForm = document.getElementById("addClientForm");
+      const addClientIcon = document.getElementById("addClientIcon");
+
+      addClientToggle.addEventListener("click", function () {
+        addClientForm.classList.toggle("collapsible-content--visible");
+        addClientIcon.textContent = addClientForm.classList.contains(
+          "collapsible-content--visible"
+        )
+          ? "▼"
+          : "▶";
+      });
+
+      // Load client IDs from server
+      async function loadClients() {
+        try {
+          const response = await fetch("/api/clients");
+          const clients = await response.json();
+
+          // Populate the output table dropdown
+          const outputSelect = document.getElementById("outputClientIdSelect");
+          outputSelect.innerHTML = "";
+          
+          // Add empty default option
+          const emptyOption = document.createElement("option");
+          emptyOption.value = "";
+          emptyOption.textContent = "";
+          outputSelect.appendChild(emptyOption);
+          
+          clients.forEach((client) => {
+            const option = document.createElement("option");
+            option.value = client.client_id;
+            option.textContent = client.client_id;
+            outputSelect.appendChild(option);
+          });
+
+          // Update the client ID list in the management section
+          const clientList = document.getElementById("clientIdList");
+          if (clients.length === 0) {
+            clientList.innerHTML = "<p class='no-clients-message'>No client IDs yet. Add one above!</p>";
+          } else {
+            clientList.innerHTML = "<h3>Existing Client IDs:</h3>";
+            const listContainer = document.createElement("div");
+            listContainer.className = "client-items";
+
+            clients.forEach((client) => {
+              const clientItem = document.createElement("div");
+              clientItem.className = "client-item";
+              
+              const clientIdSpan = document.createElement("span");
+              clientIdSpan.className = "client-item__id";
+              clientIdSpan.textContent = client.client_id;
+              
+              const deleteBtn = document.createElement("button");
+              deleteBtn.className = "btn-danger btn-small";
+              deleteBtn.textContent = "Delete";
+              deleteBtn.onclick = () => deleteClient(client.id, client.client_id);
+              
+              clientItem.appendChild(clientIdSpan);
+              clientItem.appendChild(deleteBtn);
+              listContainer.appendChild(clientItem);
+            });
+
+            clientList.appendChild(listContainer);
+          }
+        } catch (error) {
+          console.error("Error loading clients:", error);
+        }
+      }
+
+      // Add new client ID
+      const addClientIdBtn = document.getElementById("addClientIdBtn");
+      const addClientMessage = document.getElementById("addClientMessage");
+      const newClientIdInput = document.getElementById("newClientIdInput");
+
+      // Helper function to show client messages with auto-dismiss
+      function showClientMessage(message, type) {
+        addClientMessage.innerHTML = `<p class="message message--${type}">${message}</p>`;
+        setTimeout(() => {
+          addClientMessage.innerHTML = "";
+        }, 3000);
+      }
+
+      addClientIdBtn.addEventListener("click", async function () {
+        const clientId = Number.parseInt(newClientIdInput.value.trim());
+
+        // Validation
+        if (!clientId || clientId <= 0) {
+          showClientMessage("Please enter a positive client ID", "error");
+          return;
+        }
+
+        addClientIdBtn.disabled = true;
+        addClientIdBtn.textContent = "Adding...";
+
+        try {
+          const response = await fetch("/api/clients", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ client_id: clientId }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showClientMessage(data.message, "success");
+            newClientIdInput.value = "";
+            await loadClients(); // Refresh the list and dropdown
+          } else {
+            showClientMessage(data.error || "Failed to add client ID", "error");
+          }
+        } catch (error) {
+          console.error("Error adding client:", error);
+          showClientMessage("Failed to add client ID. Please try again.", "error");
+        } finally {
+          addClientIdBtn.disabled = false;
+          addClientIdBtn.textContent = "Add Client ID";
+        }
+      });
+
+      // Delete client ID
+      async function deleteClient(id, clientId) {
+        if (!confirm(`Delete client ID ${clientId}?`)) {
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/clients/${id}`, {
+            method: "DELETE",
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            showClientMessage(data.message, "success");
+            await loadClients(); // Refresh the list and dropdown
+          } else {
+            showClientMessage(data.error || "Failed to delete client ID", "error");
+          }
+        } catch (error) {
+          console.error("Error deleting client:", error);
+          showClientMessage("Failed to delete client ID. Please try again.", "error");
+        }
+      }
+
+      // Load clients on page load
+      loadClients();
+
       // Delete contact function
       async function deleteContact(contactId) {
         if (
@@ -511,7 +693,6 @@
           const data = await response.json();
 
           if (response.ok) {
-            alert(data.message);
             // Refresh grid
             loadData();
           } else {
@@ -607,7 +788,6 @@
           const data = await response.json();
 
           if (response.ok) {
-            alert(data.message);
             closeUpdateModal();
             loadData();
           } else {
@@ -795,7 +975,7 @@
         addContactMessage.innerHTML = `<div class="message message--${type}">${message}</div>`;
         setTimeout(() => {
           addContactMessage.innerHTML = "";
-        }, 5000);
+        }, 3000);
       }
 
       // File upload functionality
@@ -854,7 +1034,7 @@
         uploadMessage.innerHTML = `<div class="message message--${type}">${message}</div>`;
         setTimeout(() => {
           uploadMessage.innerHTML = "";
-        }, 5000);
+        }, 3000);
       }
 
       // Copy Output Table to Clipboard

@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { DataSource } from "typeorm";
 import { parse } from "csv-parse";
 import { Contact } from "./entities/Contact.js";
+import { Client } from "./entities/Client.js";
 // ESM equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,7 +27,7 @@ const AppDataSource = new DataSource({
     autoSave: true, // Auto-save to disk after changes
     synchronize: true,
     logging: false,
-    entities: [Contact],
+    entities: [Contact, Client],
 });
 // Middleware
 app.use(express.json());
@@ -310,6 +311,81 @@ app.delete("/api/contact/:id", async (req, res) => {
     catch (error) {
         console.error("Error deleting contact:", error);
         res.status(500).json({ error: "Failed to delete contact" });
+    }
+});
+// ==================== CLIENT ID MANAGEMENT ROUTES ====================
+// GET /api/clients - Fetch all client IDs
+app.get("/api/clients", async (req, res) => {
+    try {
+        const clientRepository = AppDataSource.getRepository(Client);
+        const clients = await clientRepository.find({
+            order: { client_id: "ASC" },
+        });
+        res.json(clients);
+    }
+    catch (error) {
+        console.error("Error fetching clients:", error);
+        res.status(500).json({ error: "Failed to fetch clients" });
+    }
+});
+// POST /api/clients - Add a new client ID
+app.post("/api/clients", async (req, res) => {
+    try {
+        const { client_id } = req.body;
+        // Validate client_id
+        if (!client_id || typeof client_id !== "number") {
+            return res.status(400).json({ error: "Client ID must be a number" });
+        }
+        if (client_id <= 0) {
+            return res.status(400).json({ error: "Client ID must be positive" });
+        }
+        const clientRepository = AppDataSource.getRepository(Client);
+        // Check if client_id already exists
+        const existingClient = await clientRepository.findOne({
+            where: { client_id },
+        });
+        if (existingClient) {
+            return res.status(400).json({ error: "Client ID already exists" });
+        }
+        // Create and save new client
+        const newClient = clientRepository.create({ client_id });
+        await clientRepository.save(newClient);
+        res.status(201).json({
+            success: true,
+            message: "Client ID added successfully",
+            client: newClient,
+        });
+    }
+    catch (error) {
+        console.error("Error adding client:", error);
+        res.status(500).json({ error: "Failed to add client" });
+    }
+});
+// DELETE /api/clients/:id - Delete a client ID
+app.delete("/api/clients/:id", async (req, res) => {
+    try {
+        const clientId = Number.parseInt(req.params.id);
+        if (Number.isNaN(clientId)) {
+            return res.status(400).json({ error: "Invalid client ID" });
+        }
+        const clientRepository = AppDataSource.getRepository(Client);
+        // Check if client exists
+        const existingClient = await clientRepository.findOne({
+            where: { id: clientId },
+        });
+        if (!existingClient) {
+            return res.status(404).json({ error: "Client ID not found" });
+        }
+        // Delete the client
+        await clientRepository.delete({ id: clientId });
+        res.json({
+            success: true,
+            message: `Client ID ${existingClient.client_id} deleted successfully`,
+        });
+    }
+    catch (error) {
+        console.error("Error deleting client:", error);
+        res.status(500).json({ error: "Failed to delete client" });
     }
 });
 // Initialize database and start server using top-level await
