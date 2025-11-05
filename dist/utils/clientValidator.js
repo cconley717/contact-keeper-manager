@@ -6,14 +6,20 @@ import { ERROR_MESSAGES } from "../constants.js";
  */
 export function validateClientData(data) {
     const errors = [];
-    // Sanitize client_id
+    // Sanitize client_id and client_name
     const sanitizedClientId = InputSanitizer.sanitizeString(data.client_id || "");
+    const sanitizedClientName = InputSanitizer.sanitizeString(data.client_name || "");
     const sanitizedData = {
         client_id: sanitizedClientId,
+        client_name: sanitizedClientName,
     };
     // Validate client_id exists and is not empty
     if (!sanitizedData.client_id || sanitizedData.client_id.trim() === "") {
         errors.push("Client ID is required and cannot be empty");
+    }
+    // Validate client_name exists and is not empty
+    if (!sanitizedData.client_name || sanitizedData.client_name.trim() === "") {
+        errors.push("Client name is required and cannot be empty");
     }
     // If required field is missing, return early
     if (errors.length > 0) {

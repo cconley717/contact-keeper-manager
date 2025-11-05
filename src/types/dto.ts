@@ -19,4 +19,5 @@ export interface UpdateContactDto extends CreateContactDto {
 
 export interface CreateClientDto {
   client_id: string;
+  client_name: string;
 }

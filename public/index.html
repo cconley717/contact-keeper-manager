@@ -154,7 +154,7 @@
         <div class="side-by-side-item">
           <h2 class="collapsible-header" id="addClientToggle">
             <span id="addClientIcon" class="collapsible-icon">▶</span>
-            Manage Client IDs
+            Manage Clients
           </h2>
           <div id="addClientForm" class="collapsible-content">
             <div class="form-grid">
@@ -162,8 +162,12 @@
                 <label class="form-label" for="newClientIdInput">Client ID *</label>
                 <input type="text" id="newClientIdInput" class="form-input" required />
               </div>
+              <div class="form-field">
+                <label class="form-label" for="newClientNameInput">Client Name *</label>
+                <input type="text" id="newClientNameInput" class="form-input" required />
+              </div>
             </div>
-            <button id="addClientIdBtn" class="btn-success btn-large">Add Client ID</button>
+            <button id="addClientIdBtn" class="btn-success btn-large">Add Client</button>
             <div id="addClientMessage"></div>
 
             <!-- List of existing client IDs -->
@@ -542,36 +546,62 @@
             clientList.textContent = "";
             const noClientsMsg = document.createElement("p");
             noClientsMsg.className = "no-clients-message";
-            noClientsMsg.textContent = "No client IDs yet. Add one above!";
+            noClientsMsg.textContent = "No clients yet. Add one above!";
             clientList.appendChild(noClientsMsg);
           } else {
             // Prevent XSS by using textContent instead of innerHTML
             clientList.textContent = "";
-            const heading = document.createElement("h3");
-            heading.textContent = "Existing Client IDs:";
-            clientList.appendChild(heading);
-            const listContainer = document.createElement("div");
-            listContainer.className = "client-items";
-
+            
+            // Create table
+            const table = document.createElement("table");
+            table.className = "client-table";
+            
+            // Create table header
+            const thead = document.createElement("thead");
+            const headerRow = document.createElement("tr");
+            
+            const idHeader = document.createElement("th");
+            idHeader.textContent = "Client ID";
+            
+            const nameHeader = document.createElement("th");
+            nameHeader.textContent = "Client Name";
+            
+            const actionsHeader = document.createElement("th");
+            actionsHeader.textContent = "Actions";
+            
+            headerRow.appendChild(idHeader);
+            headerRow.appendChild(nameHeader);
+            headerRow.appendChild(actionsHeader);
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // Create table body
+            const tbody = document.createElement("tbody");
+            
             for (const client of clients) {
-              const clientItem = document.createElement("div");
-              clientItem.className = "client-item";
-
-              const clientIdSpan = document.createElement("span");
-              clientIdSpan.className = "client-item__id";
-              clientIdSpan.textContent = client.client_id;
-
+              const row = document.createElement("tr");
+              
+              const idCell = document.createElement("td");
+              idCell.textContent = client.client_id;
+              
+              const nameCell = document.createElement("td");
+              nameCell.textContent = client.client_name;
+              
+              const actionsCell = document.createElement("td");
               const deleteBtn = document.createElement("button");
               deleteBtn.className = "btn-danger btn-small";
               deleteBtn.textContent = "Delete";
               deleteBtn.onclick = () => deleteClient(client.id, client.client_id);
-
-              clientItem.appendChild(clientIdSpan);
-              clientItem.appendChild(deleteBtn);
-              listContainer.appendChild(clientItem);
+              actionsCell.appendChild(deleteBtn);
+              
+              row.appendChild(idCell);
+              row.appendChild(nameCell);
+              row.appendChild(actionsCell);
+              tbody.appendChild(row);
             }
-
-            clientList.appendChild(listContainer);
+            
+            table.appendChild(tbody);
+            clientList.appendChild(table);
           }
         } catch (error) {
           console.error("Error loading clients:", error);
@@ -582,6 +612,7 @@
       const addClientIdBtn = document.getElementById("addClientIdBtn");
       const addClientMessage = document.getElementById("addClientMessage");
       const newClientIdInput = document.getElementById("newClientIdInput");
+      const newClientNameInput = document.getElementById("newClientNameInput");
 
       // Helper function to show messages with auto-dismiss
       function showMessage(elementId, message, type, timeout = CONFIG.MESSAGE_TIMEOUT_MS) {
@@ -599,10 +630,16 @@
 
       addClientIdBtn.addEventListener("click", async function () {
         const clientId = newClientIdInput.value.trim();
+        const clientName = newClientNameInput.value.trim();
 
         // Validation
         if (!clientId) {
           showMessage("addClientMessage", "Please enter a client ID", "error");
+          return;
+        }
+
+        if (!clientName) {
+          showMessage("addClientMessage", "Please enter a client name", "error");
           return;
         }
 
@@ -613,7 +650,7 @@
           const response = await fetch("/api/clients", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ client_id: clientId }),
+            body: JSON.stringify({ client_id: clientId, client_name: clientName }),
           });
 
           const data = await response.json();
@@ -621,6 +658,7 @@
           if (response.ok) {
             showMessage("addClientMessage", data.message, "success");
             newClientIdInput.value = "";
+            newClientNameInput.value = "";
 
             // Add new client to dropdown and list without refetching
             const newClient = data.data;
@@ -645,14 +683,14 @@
             // Refresh the client list display
             await loadClients();
           } else {
-            showMessage("addClientMessage", data.message || "Failed to add client ID", "error");
+            showMessage("addClientMessage", data.message || "Failed to add client", "error");
           }
         } catch (error) {
           console.error("Error adding client:", error);
-          showMessage("addClientMessage", "Failed to add client ID. Please try again.", "error");
+          showMessage("addClientMessage", "Failed to add client. Please try again.", "error");
         } finally {
           addClientIdBtn.disabled = false;
-          addClientIdBtn.textContent = "Add Client ID";
+          addClientIdBtn.textContent = "Add Client";
         }
       });
 

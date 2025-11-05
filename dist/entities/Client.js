@@ -11,6 +11,7 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 let Client = class Client {
     id;
     client_id;
+    client_name;
 };
 __decorate([
     PrimaryGeneratedColumn(),
@@ -20,6 +21,10 @@ __decorate([
     Column({ unique: true, type: "text" }),
     __metadata("design:type", String)
 ], Client.prototype, "client_id", void 0);
+__decorate([
+    Column({ type: "text" }),
+    __metadata("design:type", String)
+], Client.prototype, "client_name", void 0);
 Client = __decorate([
     Entity("clients")
 ], Client);

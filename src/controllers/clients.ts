@@ -56,7 +56,10 @@ export class ClientsController {
       }
 
       // Create and save new client
-      const newClient = clientRepository.create({ client_id: sanitizedData.client_id });
+      const newClient = clientRepository.create({ 
+        client_id: sanitizedData.client_id,
+        client_name: sanitizedData.client_name
+      });
       await clientRepository.save(newClient);
 
       ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);

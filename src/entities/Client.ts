@@ -7,4 +7,7 @@ export class Client {
 
   @Column({ unique: true, type: "text" })
   client_id!: string;
+
+  @Column({ type: "text" })
+  client_name!: string;
 }

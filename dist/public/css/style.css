@@ -196,6 +196,43 @@ h2 {
   padding: 20px;
 }
 
+/* Client Table */
+.client-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--spacing-sm);
+}
+
+.client-table thead {
+  background-color: var(--color-bg-gray);
+}
+
+.client-table th {
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.client-table td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.client-table tbody tr:hover {
+  background-color: var(--color-bg-lighter);
+}
+
+.client-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.client-table th:last-child,
+.client-table td:last-child {
+  text-align: center;
+}
+
 /* === FORMS === */
 .file-input-wrapper {
   display: flex;
