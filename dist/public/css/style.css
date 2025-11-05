@@ -74,6 +74,7 @@ body {
     sans-serif;
   padding: var(--spacing-xl);
   background-color: var(--color-bg-light);
+  margin-bottom: 200px;
 }
 
 /* === LAYOUT === */
