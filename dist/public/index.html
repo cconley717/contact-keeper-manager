@@ -229,6 +229,9 @@
                     Attorney Representation Related
                   </option>
                   <option value="Notice Question">Notice Question</option>
+                  <option value="Duplicate Claimant">Duplicate Claimant</option>
+                  <option value="Portal Access">Portal Access</option>
+                  <option value="Representative Claimant List">Representative Claimant List</option>
                 </select>
               </td>
             </tr>
@@ -535,7 +538,11 @@
           for (const client of clients) {
             const option = document.createElement("option");
             option.value = client.client_id;
-            option.textContent = client.client_id;
+            const fullText = `${client.client_id} - ${client.client_name}`;
+            option.textContent = fullText;
+            // Store both the full text and ID-only text as data attributes
+            option.dataset.fullText = fullText;
+            option.dataset.idOnly = client.client_id;
             outputSelect.appendChild(option);
           }
 
@@ -608,6 +615,43 @@
         }
       }
 
+      // Handle client ID dropdown - show "ID - Name" in list, but only "ID" when selected
+      const outputClientIdSelect = document.getElementById("outputClientIdSelect");
+      
+      // Function to update display based on dropdown state
+      function updateSelectDisplay(isOpen) {
+        for (const option of outputClientIdSelect.options) {
+          if (option.value && option.dataset.fullText && option.dataset.idOnly) {
+            if (isOpen || !option.selected) {
+              // When open, or for non-selected options, show full text
+              option.textContent = option.dataset.fullText;
+            } else {
+              // When closed and selected, show only ID
+              option.textContent = option.dataset.idOnly;
+            }
+          }
+        }
+      }
+      
+      outputClientIdSelect.addEventListener("click", function(e) {
+        // If dropdown is closed and user clicks (selecting an option)
+        if (this.classList.contains('select-open')) {
+          this.classList.remove('select-open');
+          updateSelectDisplay(false);
+        }
+        else {
+          this.classList.add('select-open');
+          updateSelectDisplay(true);
+        }
+      });
+      
+      outputClientIdSelect.addEventListener("blur", function() {
+        if (this.classList.contains('select-open')) {
+          this.classList.remove('select-open');
+          updateSelectDisplay(false);
+        }
+      });
+
       // Add new client ID
       const addClientIdBtn = document.getElementById("addClientIdBtn");
       const addClientMessage = document.getElementById("addClientMessage");
@@ -662,22 +706,25 @@
 
             // Add new client to dropdown and list without refetching
             const newClient = data.data;
-            const outputSelect = document.getElementById("outputClientIdSelect");
+            const outputSelectForAdd = document.getElementById("outputClientIdSelect");
             const option = document.createElement("option");
             option.value = newClient.client_id;
-            option.textContent = newClient.client_id;
+            const fullText = `${newClient.client_id} - ${newClient.client_name}`;
+            option.textContent = fullText;
+            option.dataset.fullText = fullText;
+            option.dataset.idOnly = newClient.client_id;
 
             // Insert in sorted position
             let inserted = false;
-            for (let i = 1; i < outputSelect.options.length; i++) {
-              if (Number.parseInt(outputSelect.options[i].value) > newClient.client_id) {
-                outputSelect.insertBefore(option, outputSelect.options[i]);
+            for (let i = 1; i < outputSelectForAdd.options.length; i++) {
+              if (Number.parseInt(outputSelectForAdd.options[i].value) > newClient.client_id) {
+                outputSelectForAdd.insertBefore(option, outputSelectForAdd.options[i]);
                 inserted = true;
                 break;
               }
             }
             if (!inserted) {
-              outputSelect.appendChild(option);
+              outputSelectForAdd.appendChild(option);
             }
 
             // Refresh the client list display
