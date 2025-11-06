@@ -4,6 +4,8 @@ A web-based contact management application for tracking and organizing contact i
 
 **Note**: The software in this repository was developed for the use case of an individual (read: girlfriend :yellow_heart:) and its features will likely not fit anyone else's needs. However, I will keep the repo public because the source may be of use to others, maybe.
 
+<img width="2020" height="951" alt="image" src="https://github.com/user-attachments/assets/897fdd4c-01f7-434e-a884-d61c763201bc" />
+
 ## Features
 
 - **CSV Import/Export** - Bulk upload contacts via CSV file with automatic upsert (insert or update)
