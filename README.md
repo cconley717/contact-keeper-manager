@@ -2,6 +2,8 @@
 
 A web-based contact management application for tracking and organizing contact information. Built with TypeScript, Express, and SQLite, featuring CSV import/export, real-time search, pagination, and an interactive data grid interface.
 
+Note: The software in this repository was developed for the use case of an individual (read: girlfriend :yellow_heart:) and its features will likely not fit anyone else's needs. However, I will keep the repo public because the source may be of use to others, maybe.
+
 ## Features
 
 - **CSV Import/Export** - Bulk upload contacts via CSV file with automatic upsert (insert or update)
