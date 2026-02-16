@@ -5,8 +5,8 @@ export class Client {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true, type: "text" })
-  client_id!: string;
+  @Column({ unique: true, type: "integer" })
+  client_id!: number;
 
   @Column({ type: "text" })
   client_name!: string;

@@ -13,6 +13,9 @@ export function createContactsRouter(dataSource: DataSource, upload: Multer) {
   // POST /api/contacts/upload - Upload and import CSV file
   router.post("/upload", upload.single("file"), (req, res) => controller.uploadCsv(req, res));
 
+  // GET /api/contacts/download - Download and export CSV file
+  router.get("/download", (req, res) => controller.exportCsv(req, res));
+
   // POST /api/contacts - Add or update a contact
   router.post("/", (req, res) => controller.createContact(req, res));
 

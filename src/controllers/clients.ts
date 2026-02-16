@@ -6,9 +6,14 @@ import { ResponseBuilder } from "../utils/response.js";
 import { ERROR_MESSAGES, HTTP_STATUS } from "../constants.js";
 import { isPositiveInteger } from "../utils/validation.js";
 import { validateClientData } from "../utils/clientValidator.js";
+import { CsvService } from "../services/csvService.js";
 
 export class ClientsController {
-  constructor(private readonly dataSource: DataSource) {}
+  private readonly csvService: CsvService;
+
+  constructor(private readonly dataSource: DataSource) {
+    this.csvService = new CsvService(dataSource);
+  }
 
   /**
    * GET /api/clients - Fetch all client IDs
@@ -63,6 +68,60 @@ export class ClientsController {
       await clientRepository.save(newClient);
 
       ResponseBuilder.success(res, newClient, "Client ID added successfully", HTTP_STATUS.CREATED);
+    } catch (error) {
+      if (error instanceof Error) {
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+      }
+    }
+  }
+
+  /**
+   * POST /api/clients/upload - Upload and import clients CSV file
+   */
+  async uploadCsv(req: Request, res: Response): Promise<void> {
+    if (!req.file) {
+      return ResponseBuilder.badRequest(res, ERROR_MESSAGES.NO_FILE_UPLOADED);
+    }
+
+    try {
+      const result = await this.csvService.importClients(req.file.buffer);
+
+      const skippedText = result.skipped > 0 ? `, ${result.skipped} skipped` : "";
+      const message = `Successfully imported ${result.totalRecords - result.skipped} clients (${result.inserted} new, ${result.updated} updated)${skippedText}`;
+
+      ResponseBuilder.success(
+        res,
+        {
+          count: result.totalRecords - result.skipped,
+          inserted: result.inserted,
+          updated: result.updated,
+          skipped: result.skipped,
+          errors: result.errors,
+        },
+        message
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        ResponseBuilder.internalError(res, error);
+      } else {
+        ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+      }
+    }
+  }
+
+  /**
+   * GET /api/clients/download - Export clients as CSV file
+   */
+  async exportCsv(_req: Request, res: Response): Promise<void> {
+    try {
+      const result = await this.csvService.exportClients();
+
+      res.setHeader("Content-Type", result.mimeType);
+      res.setHeader("Content-Disposition", `attachment; filename="${result.filename}"`);
+      res.setHeader("Content-Length", result.content.length.toString());
+      res.status(200).send(result.content);
     } catch (error) {
       if (error instanceof Error) {
         ResponseBuilder.internalError(res, error);

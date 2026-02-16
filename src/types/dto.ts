@@ -1,15 +1,14 @@
 // Data Transfer Objects for API request validation
 
 export interface CreateContactDto {
-  contact_id: string;
+  contact_id: number | string;
   first_name: string;
   last_name: string;
   program: string;
   email_address: string;
   phone: string;
   contact_created_date: string;
-  action: string;
-  law_firm_id: string;
+  law_firm_id: number | string;
   law_firm_name: string;
 }
 
@@ -18,6 +17,6 @@ export interface UpdateContactDto extends CreateContactDto {
 }
 
 export interface CreateClientDto {
-  client_id: string;
+  client_id: number | string;
   client_name: string;
 }

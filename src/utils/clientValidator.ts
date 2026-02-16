@@ -4,7 +4,7 @@ import { ERROR_MESSAGES } from "../constants.js";
 import type { CreateClientDto } from "../types/dto.js";
 
 export interface SanitizedClientData {
-  client_id: string;
+  client_id: number;
   client_name: string;
 }
 
@@ -21,7 +21,7 @@ export function validateClientData(data: CreateClientDto): ClientValidationResul
   const errors: string[] = [];
 
   // Sanitize client_id and client_name
-  const sanitizedClientId = InputSanitizer.sanitizeString(data.client_id || "");
+  const sanitizedClientId = InputSanitizer.sanitizeInteger(data.client_id);
   const sanitizedClientName = InputSanitizer.sanitizeString(data.client_name || "");
 
   const sanitizedData: SanitizedClientData = {
@@ -30,7 +30,7 @@ export function validateClientData(data: CreateClientDto): ClientValidationResul
   };
 
   // Validate client_id exists and is not empty
-  if (!sanitizedData.client_id || sanitizedData.client_id.trim() === "") {
+  if (!sanitizedData.client_id) {
     errors.push("Client ID is required and cannot be empty");
   }
 

@@ -34,6 +34,9 @@ export function isValidDateFormat(dateStr) {
  * Validate if a value is a positive integer (#56, #57, #59)
  */
 export function isPositiveInteger(value) {
+    if (typeof value === "number") {
+        return Number.isInteger(value) && value > 0;
+    }
     const num = Number.parseInt(value, 10);
     return !Number.isNaN(num) && num > 0 && String(num) === value;
 }

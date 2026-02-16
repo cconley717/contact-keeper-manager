@@ -25,9 +25,12 @@ export const CSV_CONFIG = {
     EMAIL_ADDRESS: "email_address",
     PHONE: "phone",
     CONTACT_CREATED_DATE: "contact_created_date",
-    ACTION: "action",
     LAW_FIRM_ID: "law_firm_id",
     LAW_FIRM_NAME: "law_firm_name",
+  },
+  CLIENT_COLUMN_NAMES: {
+    CLIENT_ID: "client_id",
+    CLIENT_NAME: "client_name",
   },
 } as const;
 
@@ -46,7 +49,6 @@ export const VALIDATION = {
     "email_address",
     "phone",
     "contact_created_date",
-    "action",
     "law_firm_id",
     "law_firm_name",
   ] as const,

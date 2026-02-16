@@ -4,15 +4,14 @@ import { ERROR_MESSAGES } from "../constants.js";
 import type { CreateContactDto } from "../types/dto.js";
 
 export interface SanitizedContactData {
-  contact_id: string;
+  contact_id: number;
   first_name: string;
   last_name: string;
   program: string;
   email_address: string;
   phone: string;
   contact_created_date: string;
-  action: string;
-  law_firm_id: string;
+  law_firm_id: number;
   law_firm_name: string;
 }
 
@@ -33,7 +32,7 @@ export function validateContactData(data: CreateContactDto): ContactValidationRe
   const sanitizedData = InputSanitizer.sanitizeContactData(data);
 
   // Validate required fields exist and are not empty
-  if (!sanitizedData.contact_id || sanitizedData.contact_id.trim() === "") {
+  if (!sanitizedData.contact_id) {
     errors.push("Contact ID is required and cannot be empty");
   }
 
@@ -53,7 +52,7 @@ export function validateContactData(data: CreateContactDto): ContactValidationRe
     errors.push("Contact Created Date is required");
   }
 
-  if (!sanitizedData.law_firm_id || sanitizedData.law_firm_id.trim() === "") {
+  if (!sanitizedData.law_firm_id) {
     errors.push("Law Firm ID is required");
   }
 
@@ -84,11 +83,11 @@ export function validateContactData(data: CreateContactDto): ContactValidationRe
     return { isValid: false, errors, sanitizedData };
   }
 
-  const ContactValidationResult: ContactValidationResult = {
+  const contactValidationResult: ContactValidationResult = {
     isValid: true,
     errors: [],
-    sanitizedData
+    sanitizedData,
   };
 
-  return ContactValidationResult;
+  return contactValidationResult;
 }

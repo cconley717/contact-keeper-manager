@@ -12,16 +12,15 @@ const CONFIG = {
   MESSAGE_TIMEOUT_MS: 3000,
   COLUMN_WIDTHS: {
     ACTIONS: 260,
-    CONTACT_ID: 120,
+    CONTACT_ID: 130,
     FIRST_NAME: 140,
     LAST_NAME: 140,
     PROGRAM: 180,
     EMAIL_ADDRESS: 220,
     PHONE: 150,
-    CREATED_DATE: 130,
-    FIRM_ID: 100,
+    CREATED_DATE: 150,
+    LAW_FIRM_ID: 150,
     LAW_FIRM_NAME: 200,
-    ACTION: 100,
   },
 };
 
@@ -82,7 +81,7 @@ function createGridColumnDefs() {
   return [
     {
       field: "actions",
-      headerName: "",
+      headerName: "Actions",
       width: CONFIG.COLUMN_WIDTHS.ACTIONS,
       cellRenderer: function (params) {
         return `
@@ -102,9 +101,8 @@ function createGridColumnDefs() {
     { field: "email_address", headerName: "Email Address", width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS, filter: true, sortable: true },
     { field: "phone", headerName: "Phone", width: CONFIG.COLUMN_WIDTHS.PHONE, filter: true, sortable: true },
     { field: "contact_created_date", headerName: "Created Date", width: CONFIG.COLUMN_WIDTHS.CREATED_DATE, filter: true, sortable: true },
-    { field: "law_firm_id", headerName: "Firm ID", width: CONFIG.COLUMN_WIDTHS.FIRM_ID, filter: true, sortable: true },
+    { field: "law_firm_id", headerName: "Law Firm ID", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID, filter: true, sortable: true },
     { field: "law_firm_name", headerName: "Law Firm", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME, filter: true, sortable: true },
-    { field: "action", headerName: "Action", width: CONFIG.COLUMN_WIDTHS.ACTION, filter: true, sortable: true },
   ];
 }
 
@@ -276,8 +274,6 @@ function clearContactForm() {
   document.getElementById("newProgram").value = "";
   document.getElementById("newEmail").value = "";
   document.getElementById("newPhone").value = "";
-  document.getElementById("newCreatedDate").value = "";
-  document.getElementById("newAction").value = "";
   document.getElementById("newLawFirmId").value = "";
   document.getElementById("newLawFirmName").value = "";
 }
@@ -299,7 +295,6 @@ function openUpdateModal(contactData) {
   document.getElementById("updateEmail").value = contactData.email_address || "";
   document.getElementById("updatePhone").value = contactData.phone || "";
   document.getElementById("updateCreatedDate").value = contactData.contact_created_date || "";
-  document.getElementById("updateAction").value = contactData.action || "";
   document.getElementById("updateLawFirmId").value = contactData.law_firm_id || "";
   document.getElementById("updateLawFirmName").value = contactData.law_firm_name || "";
 
@@ -326,7 +321,6 @@ async function saveUpdatedContact() {
     email_address: document.getElementById("updateEmail").value.trim(),
     phone: document.getElementById("updatePhone").value.trim(),
     contact_created_date: document.getElementById("updateCreatedDate").value.trim(),
-    action: document.getElementById("updateAction").value.trim(),
     law_firm_id: document.getElementById("updateLawFirmId").value.trim(),
     law_firm_name: document.getElementById("updateLawFirmName").value.trim(),
   };
@@ -652,7 +646,156 @@ async function handleCsvUpload(file) {
     showMessage("uploadMessage", "Upload failed. Please try again.", "error");
   } finally {
     uploadBtn.disabled = false;
-    uploadBtn.textContent = "Upload & Import";
+    uploadBtn.textContent = "Import";
+  }
+}
+
+/**
+ * Handle CSV file download
+ */
+async function handleCsvDownload() {
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = "Downloading...";
+
+  try {
+    const response = await fetch("/api/contacts/download", {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Failed to download contacts";
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // Ignore JSON parse failures and keep default error message
+      }
+
+      showMessage("downloadMessage", errorMessage, "error");
+      return;
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    const filename = filenameMatch ? filenameMatch[1] : "contacts-export.csv";
+
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+
+    showMessage("downloadMessage", "CSV download completed successfully", "success");
+  } catch (error) {
+    console.error("Download error:", error);
+    showMessage("downloadMessage", "Download failed. Please try again.", "error");
+  } finally {
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = "Export";
+  }
+}
+
+/**
+ * Handle clients CSV upload
+ */
+async function handleClientCsvUpload(file) {
+  if (!file) {
+    showMessage("clientCsvMessage", "Please select a CSV file", "error");
+    return;
+  }
+
+  if (!file.name.endsWith(".csv")) {
+    showMessage("clientCsvMessage", "Please select a valid CSV file", "error");
+    return;
+  }
+
+  const importBtn = document.getElementById("importClientCsvBtn");
+  const formData = new FormData();
+  formData.append("file", file);
+
+  importBtn.disabled = true;
+  importBtn.textContent = "Importing...";
+
+  try {
+    const response = await fetch("/api/clients/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showMessage("clientCsvMessage", data.message, "success");
+      document.getElementById("clientCsvFile").value = "";
+      await loadClients();
+    } else {
+      showMessage("clientCsvMessage", data.message || "Client CSV import failed", "error");
+    }
+  } catch (error) {
+    console.error("Client CSV import error:", error);
+    showMessage("clientCsvMessage", "Import failed. Please try again.", "error");
+  } finally {
+    importBtn.disabled = false;
+    importBtn.textContent = "Import CSV";
+  }
+}
+
+/**
+ * Handle clients CSV download
+ */
+async function handleClientCsvDownload() {
+  const exportBtn = document.getElementById("exportClientCsvBtn");
+
+  exportBtn.disabled = true;
+  exportBtn.textContent = "Exporting...";
+
+  try {
+    const response = await fetch("/api/clients/download", {
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      let errorMessage = "Failed to export clients";
+
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorMessage;
+      } catch {
+        // Ignore JSON parse failures and keep default error message
+      }
+
+      showMessage("clientCsvMessage", errorMessage, "error");
+      return;
+    }
+
+    const blob = await response.blob();
+    const contentDisposition = response.headers.get("content-disposition") || "";
+    const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    const filename = filenameMatch ? filenameMatch[1] : "clients-export.csv";
+
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(downloadUrl);
+
+    showMessage("clientCsvMessage", "Clients CSV export completed successfully", "success");
+  } catch (error) {
+    console.error("Client CSV export error:", error);
+    showMessage("clientCsvMessage", "Export failed. Please try again.", "error");
+  } finally {
+    exportBtn.disabled = false;
+    exportBtn.textContent = "Export CSV";
   }
 }
 
@@ -835,6 +978,22 @@ function setupEventListeners() {
     addClientIdBtn.textContent = "Add Client";
   });
 
+  // Client CSV buttons
+  const clientCsvFile = document.getElementById("clientCsvFile");
+  const importClientCsvBtn = document.getElementById("importClientCsvBtn");
+  const exportClientCsvBtn = document.getElementById("exportClientCsvBtn");
+
+  importClientCsvBtn.addEventListener("click", function () {
+    clientCsvFile.click();
+  });
+
+  clientCsvFile.addEventListener("change", async function () {
+    const file = this.files[0];
+    await handleClientCsvUpload(file);
+  });
+
+  exportClientCsvBtn.addEventListener("click", handleClientCsvDownload);
+
   // Add contact button
   const addContactBtn = document.getElementById("addContactBtn");
   addContactBtn.addEventListener("click", async function () {
@@ -845,8 +1004,6 @@ function setupEventListeners() {
       program: document.getElementById("newProgram").value.trim(),
       email_address: document.getElementById("newEmail").value.trim(),
       phone: document.getElementById("newPhone").value.trim(),
-      contact_created_date: document.getElementById("newCreatedDate").value.trim(),
-      action: document.getElementById("newAction").value.trim(),
       law_firm_id: document.getElementById("newLawFirmId").value.trim(),
       law_firm_name: document.getElementById("newLawFirmName").value.trim(),
     };
@@ -857,13 +1014,12 @@ function setupEventListeners() {
       !contactData.first_name ||
       !contactData.last_name ||
       !contactData.email_address ||
-      !contactData.contact_created_date ||
       !contactData.law_firm_id ||
       !contactData.law_firm_name
     ) {
       showMessage(
         "addContactMessage",
-        "Contact ID, First Name, Last Name, Email Address, Contact Created Date, Law Firm ID, and Law Firm Name are required",
+        "Contact ID, First Name, Last Name, Email Address, Law Firm ID, and Law Firm Name are required",
         "error"
       );
       return;
@@ -884,6 +1040,10 @@ function setupEventListeners() {
     const file = document.getElementById("csvFile").files[0];
     await handleCsvUpload(file);
   });
+
+  // CSV download button
+  const downloadBtn = document.getElementById("downloadBtn");
+  downloadBtn.addEventListener("click", handleCsvDownload);
 
   // Copy output button
   const copyOutputBtn = document.getElementById("copyOutputBtn");

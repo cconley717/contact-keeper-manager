@@ -113,7 +113,8 @@ h2 {
 }
 
 /* === SECTIONS === */
-.upload-section {
+.upload-section,
+.download-section {
   margin-bottom: var(--spacing-xxl);
   padding: var(--spacing-xl);
   border: 2px dashed var(--color-border);
@@ -234,11 +235,25 @@ h2 {
   text-align: center;
 }
 
+.client-csv-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+.client-csv-actions button {
+  flex: 1;
+}
+
 /* === FORMS === */
 .file-input-wrapper {
   display: flex;
   gap: 10px;
   align-items: center;
+}
+
+.download-section .file-input-wrapper {
+  justify-content: flex-end;
 }
 
 input[type="file"] {

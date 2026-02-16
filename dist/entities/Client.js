@@ -18,8 +18,8 @@ __decorate([
     __metadata("design:type", Number)
 ], Client.prototype, "id", void 0);
 __decorate([
-    Column({ unique: true, type: "text" }),
-    __metadata("design:type", String)
+    Column({ unique: true, type: "integer" }),
+    __metadata("design:type", Number)
 ], Client.prototype, "client_id", void 0);
 __decorate([
     Column({ type: "text" }),

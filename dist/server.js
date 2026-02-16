@@ -43,7 +43,7 @@ try {
     console.log("Database initialized successfully");
     // Mount route modules
     const contactsRouter = createContactsRouter(AppDataSource, upload);
-    const clientsRouter = createClientsRouter(AppDataSource);
+    const clientsRouter = createClientsRouter(AppDataSource, upload);
     app.use("/api/contacts", contactsRouter);
     app.use("/api/clients", clientsRouter);
     const server = app.listen(PORT, () => {

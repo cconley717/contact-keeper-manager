@@ -29,7 +29,11 @@
         <div class="modal-form-grid">
           <div>
             <label class="form-label" for="updateContactId">Contact ID *</label>
-            <input type="text" id="updateContactId" class="form-input" required />
+            <input id="updateContactId" class="form-input" 
+              type="number"
+              min="1"
+              step="1"
+              required />
           </div>
           <div>
             <label class="form-label" for="updateFirstName">First Name *</label>
@@ -52,20 +56,21 @@
             <input type="tel" id="updatePhone" class="form-input" />
           </div>
           <div>
-            <label class="form-label" for="updateCreatedDate">Contact Created Date *</label>
-            <input type="text" id="updateCreatedDate" class="form-input" required />
-          </div>
-          <div>
-            <label class="form-label" for="updateAction">Action</label>
-            <input type="text" id="updateAction" class="form-input" />
-          </div>
-          <div>
             <label class="form-label" for="updateLawFirmId">Law Firm ID *</label>
-            <input type="text" id="updateLawFirmId" class="form-input" required />
+            <input id="updateLawFirmId" class="form-input"
+              type="number"
+              min="1"
+              step="1"
+              required
+            />
           </div>
           <div>
             <label class="form-label" for="updateLawFirmName">Law Firm Name *</label>
             <input type="text" id="updateLawFirmName" class="form-input" required />
+          </div>
+          <div>
+            <label class="form-label" for="updateCreatedDate">Contact Created Date *</label>
+            <input type="text" id="updateCreatedDate" class="form-input" required />
           </div>
         </div>
         <div class="modal-actions">
@@ -83,9 +88,18 @@
         <h2>Import CSV File</h2>
         <div class="file-input-wrapper">
           <input type="file" id="csvFile" accept=".csv" />
-          <button id="uploadBtn" class="btn-primary">Upload & Import</button>
+          <button id="uploadBtn" class="btn-primary">Import</button>
         </div>
         <div id="uploadMessage"></div>
+      </div>
+
+      <!-- Download Section -->
+      <div class="download-section">
+        <h2>Export CSV File</h2>
+        <div class="file-input-wrapper">
+          <button id="downloadBtn" class="btn-primary">Export</button>
+        </div>
+        <div id="downloadMessage"></div>
       </div>
 
       <!-- Add New Contact and Client ID Management (Side-by-Side) -->
@@ -100,7 +114,12 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newContactId">Contact ID *</label>
-                <input type="text" id="newContactId" class="form-input" required />
+                <input id="newContactId" class="form-input" 
+                  type="number"
+                  min="1"
+                  step="1"
+                  required
+                />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newFirstName">First Name *</label>
@@ -123,22 +142,13 @@
                 <input type="text" id="newPhone" class="form-input" />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newCreatedDate">Contact Created Date *</label>
-                <input
-                  type="text"
-                  id="newCreatedDate"
-                  class="form-input"
-                  placeholder="MM/DD/YYYY"
+                <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
+                <input id="newLawFirmId" class="form-input"
+                  type="number"
+                  min="1"
+                  step="1"
                   required
                 />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="newAction">Action</label>
-                <input type="text" id="newAction" class="form-input" />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
-                <input type="text" id="newLawFirmId" class="form-input" required />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
@@ -160,7 +170,12 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newClientIdInput">Client ID *</label>
-                <input type="text" id="newClientIdInput" class="form-input" required />
+                <input id="newClientIdInput" class="form-input"
+                  type="number"
+                  min="1"
+                  step="1"
+                  required
+                />
               </div>
               <div class="form-field">
                 <label class="form-label" for="newClientNameInput">Client Name *</label>
@@ -168,6 +183,15 @@
               </div>
             </div>
             <button id="addClientIdBtn" class="btn-success btn-large">Add Client</button>
+
+            <div class="client-csv-actions">
+              <input type="file" id="clientCsvFile" accept=".csv" class="hidden" />
+              <button id="importClientCsvBtn" class="btn-primary btn-large">Import</button>
+              <button id="exportClientCsvBtn" class="btn-primary btn-large">Export</button>
+            </div>
+
+            <div id="clientCsvMessage"></div>
+
             <div id="addClientMessage"></div>
 
             <!-- List of existing client IDs -->
@@ -237,7 +261,7 @@
             </tr>
             <tr>
               <th>Firm ID(s)</th>
-              <td><input type="text" data-field="law_firm_id" /></td>
+              <td><input type="number" data-field="law_firm_id" min="1" step="1" /></td>
             </tr>
             <tr>
               <th>Claimant ID(s)</th>

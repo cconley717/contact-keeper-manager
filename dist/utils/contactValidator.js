@@ -10,7 +10,7 @@ export function validateContactData(data) {
     // Sanitize all input fields
     const sanitizedData = InputSanitizer.sanitizeContactData(data);
     // Validate required fields exist and are not empty
-    if (!sanitizedData.contact_id || sanitizedData.contact_id.trim() === "") {
+    if (!sanitizedData.contact_id) {
         errors.push("Contact ID is required and cannot be empty");
     }
     if (!sanitizedData.first_name || sanitizedData.first_name.trim() === "") {
@@ -25,7 +25,7 @@ export function validateContactData(data) {
     if (!sanitizedData.contact_created_date || sanitizedData.contact_created_date.trim() === "") {
         errors.push("Contact Created Date is required");
     }
-    if (!sanitizedData.law_firm_id || sanitizedData.law_firm_id.trim() === "") {
+    if (!sanitizedData.law_firm_id) {
         errors.push("Law Firm ID is required");
     }
     if (!sanitizedData.law_firm_name || sanitizedData.law_firm_name.trim() === "") {
@@ -49,11 +49,11 @@ export function validateContactData(data) {
     if (errors.length > 0) {
         return { isValid: false, errors, sanitizedData };
     }
-    const ContactValidationResult = {
+    const contactValidationResult = {
         isValid: true,
         errors: [],
-        sanitizedData
+        sanitizedData,
     };
-    return ContactValidationResult;
+    return contactValidationResult;
 }
 //# sourceMappingURL=contactValidator.js.map

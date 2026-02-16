@@ -19,12 +19,14 @@ export class ContactsController {
             const page = Number.parseInt(req.query.page, 10) || 0;
             const pageSize = Math.min(Number.parseInt(req.query.pageSize, 10) || PAGINATION.DEFAULT_PAGE_SIZE, PAGINATION.MAX_PAGE_SIZE);
             const search = req.query.search || "";
+            const requestedSortOrder = req.query.sortOrder;
+            const hasSortOrder = requestedSortOrder === "asc" || requestedSortOrder === "desc";
+            const sortOrder = requestedSortOrder === "desc" ? "DESC" : "ASC";
             // Validate sortField against whitelist to prevent SQL injection (#38)
             const requestedSortField = req.query.sortField || "contact_id";
             const sortField = VALIDATION.ALLOWED_SORT_FIELDS.includes(requestedSortField)
                 ? requestedSortField
                 : "contact_id";
-            const sortOrder = req.query.sortOrder === "desc" ? "DESC" : "ASC";
             const contactRepository = this.dataSource.getRepository(Contact);
             // Build query
             let queryBuilder = contactRepository.createQueryBuilder("contact");
@@ -32,7 +34,7 @@ export class ContactsController {
             if (search) {
                 const searchParam = `%${search}%`;
                 queryBuilder = queryBuilder
-                    .where("contact.contact_id LIKE :search", { search: searchParam })
+                    .where("CAST(contact.contact_id AS TEXT) LIKE :search", { search: searchParam })
                     .orWhere("contact.first_name LIKE :search", { search: searchParam })
                     .orWhere("contact.last_name LIKE :search", { search: searchParam })
                     .orWhere("contact.program LIKE :search", { search: searchParam })
@@ -43,23 +45,21 @@ export class ContactsController {
                     .orWhere("contact.contact_created_date LIKE :search", {
                     search: searchParam,
                 })
-                    .orWhere("contact.action LIKE :search", { search: searchParam })
-                    .orWhere("contact.law_firm_id LIKE :search", { search: searchParam })
+                    .orWhere("CAST(contact.law_firm_id AS TEXT) LIKE :search", { search: searchParam })
                     .orWhere("contact.law_firm_name LIKE :search", {
                     search: searchParam,
                 });
             }
             // Get total count
             const totalCount = await queryBuilder.getCount();
-            // Apply sorting and pagination
-            // Use object notation for safer column reference (prevents SQL injection)
-            const orderByColumn = {};
-            orderByColumn[`contact.${sortField}`] = sortOrder;
-            const contacts = await queryBuilder
-                .orderBy(orderByColumn)
-                .skip(page * pageSize)
-                .take(pageSize)
-                .getMany();
+            // Apply pagination and optional sorting
+            if (hasSortOrder) {
+                // Use object notation for safer column reference (prevents SQL injection)
+                const orderByColumn = {};
+                orderByColumn[`contact.${sortField}`] = sortOrder;
+                queryBuilder = queryBuilder.orderBy(orderByColumn);
+            }
+            const contacts = await queryBuilder.skip(page * pageSize).take(pageSize).getMany();
             ResponseBuilder.paginated(res, contacts, totalCount, page, pageSize);
         }
         catch (error) {
@@ -101,11 +101,32 @@ export class ContactsController {
         }
     }
     /**
+     * GET /api/contacts/export - Export contacts as CSV file
+     */
+    async exportCsv(_req, res) {
+        try {
+            const result = await this.csvService.exportContacts();
+            res.setHeader("Content-Type", result.mimeType);
+            res.setHeader("Content-Disposition", `attachment; filename="${result.filename}"`);
+            res.setHeader("Content-Length", result.content.length.toString());
+            res.status(200).send(result.content);
+        }
+        catch (error) {
+            if (error instanceof Error) {
+                ResponseBuilder.internalError(res, error);
+            }
+            else {
+                ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
+            }
+        }
+    }
+    /**
      * POST /api/contacts - Add or update a contact
      */
     async createContact(req, res) {
         try {
             const createContactDto = req.body;
+            createContactDto.contact_created_date = this.getCurrentDateString();
             const validation = validateContactData(createContactDto);
             if (!validation.isValid) {
                 return ResponseBuilder.badRequest(res, validation.errors.join(", "));
@@ -119,13 +140,13 @@ export class ContactsController {
             if (existingContact) {
                 // Update existing contact
                 await contactRepository.update({ contact_id: sanitizedData.contact_id }, sanitizedData);
-                ResponseBuilder.success(res, { action: "updated" }, "Contact updated successfully");
+                ResponseBuilder.success(res, { operation: "updated" }, "Contact updated successfully");
             }
             else {
                 // Insert new contact
                 const newContact = contactRepository.create(sanitizedData);
                 await contactRepository.save(newContact);
-                ResponseBuilder.success(res, { action: "inserted" }, "Contact added successfully");
+                ResponseBuilder.success(res, { operation: "inserted" }, "Contact added successfully");
             }
         }
         catch (error) {
@@ -142,12 +163,22 @@ export class ContactsController {
      */
     async updateContact(req, res) {
         try {
-            const contactId = req.params.id;
+            const contactIdParam = req.params.id;
             // Validate ID using consistent helper function
-            if (!isPositiveInteger(contactId)) {
+            if (!isPositiveInteger(contactIdParam)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
             }
+            const contactId = Number.parseInt(contactIdParam, 10);
             const updateContactDto = req.body;
+            const contactRepository = this.dataSource.getRepository(Contact);
+            const existingContactForDate = await contactRepository.findOne({
+                where: { contact_id: contactId },
+            });
+            if (!existingContactForDate) {
+                return ResponseBuilder.notFound(res, ERROR_MESSAGES.CONTACT_NOT_FOUND);
+            }
+            // Always ignore client-provided created date and preserve stored value
+            updateContactDto.contact_created_date = existingContactForDate.contact_created_date;
             const validation = validateContactData(updateContactDto);
             if (!validation.isValid) {
                 return ResponseBuilder.badRequest(res, validation.errors.join(", "));
@@ -205,11 +236,12 @@ export class ContactsController {
      */
     async deleteContact(req, res) {
         try {
-            const contactId = req.params.id;
+            const contactIdParam = req.params.id;
             // Validate ID using consistent helper function
-            if (!isPositiveInteger(contactId)) {
+            if (!isPositiveInteger(contactIdParam)) {
                 return ResponseBuilder.badRequest(res, ERROR_MESSAGES.INVALID_CONTACT_ID);
             }
+            const contactId = Number.parseInt(contactIdParam, 10);
             const contactRepository = this.dataSource.getRepository(Contact);
             // Check if contact exists
             const existingContact = await contactRepository.findOne({
@@ -230,6 +262,13 @@ export class ContactsController {
                 ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
             }
         }
+    }
+    getCurrentDateString() {
+        const now = new Date();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const year = String(now.getFullYear());
+        return `${month}/${day}/${year}`;
     }
 }
 //# sourceMappingURL=contacts.js.map

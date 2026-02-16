@@ -60,19 +60,19 @@ export class InputSanitizer {
   /**
    * Sanitize a string representation of an integer with range validation (#47)
    */
-  static sanitizeInteger(value: string): string {
-    if (!value) return "";
+  static sanitizeInteger(value: string | number): number {
+    if (value === null || value === undefined || value === "") return 0;
 
-    const num = Number.parseInt(value, 10);
+    const parsedValue = typeof value === "number" ? value : Number.parseInt(value, 10);
 
-    if (Number.isNaN(num)) return "";
+    if (Number.isNaN(parsedValue)) return 0;
 
     // Validate numeric range to prevent negative or overflow values
-    if (num < VALIDATION.MIN_POSITIVE_INTEGER || num > VALIDATION.MAX_INTEGER) {
-      return "";
+    if (parsedValue < VALIDATION.MIN_POSITIVE_INTEGER || parsedValue > VALIDATION.MAX_INTEGER) {
+      return 0;
     }
 
-    return String(num);
+    return parsedValue;
   }
 
   /**
@@ -103,7 +103,6 @@ export class InputSanitizer {
       email_address: this.sanitizeEmail(data.email_address),
       phone: this.sanitizePhone(data.phone),
       contact_created_date: this.sanitizeDate(data.contact_created_date),
-      action: this.sanitizeString(data.action),
       law_firm_id: this.sanitizeInteger(data.law_firm_id),
       law_firm_name: this.sanitizeString(data.law_firm_name),
     };

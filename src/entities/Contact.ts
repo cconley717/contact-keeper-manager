@@ -2,8 +2,8 @@ import { Entity, PrimaryColumn, Column, Index } from "typeorm";
 
 @Entity("contacts")
 export class Contact {
-  @PrimaryColumn("text")
-  contact_id!: string;
+  @PrimaryColumn("integer")
+  contact_id!: number;
 
   @Index()
   @Column("text", { default: "" })
@@ -30,12 +30,8 @@ export class Contact {
   contact_created_date: string = "";
 
   @Index()
-  @Column("text", { default: "" })
-  action: string = "";
-
-  @Index()
-  @Column("text", { default: "" })
-  law_firm_id: string = "";
+  @Column("integer", { default: 0 })
+  law_firm_id: number = 0;
 
   @Index()
   @Column("text", { default: "" })

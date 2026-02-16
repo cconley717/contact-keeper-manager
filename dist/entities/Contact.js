@@ -16,13 +16,12 @@ let Contact = class Contact {
     email_address = "";
     phone = "";
     contact_created_date = "";
-    action = "";
-    law_firm_id = "";
+    law_firm_id = 0;
     law_firm_name = "";
 };
 __decorate([
-    PrimaryColumn("text"),
-    __metadata("design:type", String)
+    PrimaryColumn("integer"),
+    __metadata("design:type", Number)
 ], Contact.prototype, "contact_id", void 0);
 __decorate([
     Index(),
@@ -56,13 +55,8 @@ __decorate([
 ], Contact.prototype, "contact_created_date", void 0);
 __decorate([
     Index(),
-    Column("text", { default: "" }),
-    __metadata("design:type", String)
-], Contact.prototype, "action", void 0);
-__decorate([
-    Index(),
-    Column("text", { default: "" }),
-    __metadata("design:type", String)
+    Column("integer", { default: 0 }),
+    __metadata("design:type", Number)
 ], Contact.prototype, "law_firm_id", void 0);
 __decorate([
     Index(),
