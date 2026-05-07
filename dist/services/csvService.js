@@ -1,7 +1,7 @@
 import { parse } from "csv-parse";
 import { Contact } from "../entities/Contact.js";
-import { Client } from "../entities/Client.js";
 import { CSV_CONFIG } from "../constants.js";
+import { validateContactData } from "../utils/contactValidator.js";
 /**
  * Service for handling CSV file operations
  */
@@ -17,6 +17,7 @@ export class CsvService {
         const contacts = [];
         const errors = [];
         let skipped = 0;
+        let rowNumber = 1;
         // Parse CSV from buffer
         const parser = parse(fileBuffer, {
             columns: true,
@@ -29,37 +30,30 @@ export class CsvService {
         // Extract column names for validation
         const cols = CSV_CONFIG.COLUMN_NAMES;
         for await (const record of parser) {
+            rowNumber++;
             // Check batch size limit to prevent memory issues (#41)
             if (contacts.length >= CSV_CONFIG.MAX_RECORDS_PER_BATCH) {
                 errors.push(`Batch size limit reached (${CSV_CONFIG.MAX_RECORDS_PER_BATCH} records). Additional records were not processed.`);
                 break;
             }
-            const contactIdRaw = record[cols.CONTACT_ID]?.trim() || "";
-            const contactId = Number.parseInt(contactIdRaw, 10);
-            const lawFirmIdRaw = record[cols.LAW_FIRM_ID]?.trim() || "";
-            const lawFirmId = Number.parseInt(lawFirmIdRaw, 10);
-            // Skip records with invalid contact_id
-            if (!Number.isInteger(contactId) || contactId <= 0) {
+            const contactData = {
+                contact_id: record[cols.CONTACT_ID] ?? "",
+                first_name: record[cols.FIRST_NAME] ?? "",
+                last_name: record[cols.LAST_NAME] ?? "",
+                client_id: record[cols.CLIENT_ID] ?? "",
+                client_name: record[cols.CLIENT_NAME] ?? "",
+                email_address: record[cols.EMAIL_ADDRESS] ?? "",
+                phone: record[cols.PHONE] ?? "",
+                law_firm_id: record[cols.LAW_FIRM_ID] ?? "",
+                law_firm_name: record[cols.LAW_FIRM_NAME] ?? "",
+            };
+            const validation = validateContactData(contactData);
+            if (!validation.isValid) {
                 skipped++;
-                errors.push(`Skipping record with invalid contact_id: ${contactIdRaw || "<empty>"}`);
+                errors.push(`Skipping row ${rowNumber}: ${validation.errors.join(", ")}`);
                 continue;
             }
-            if (!Number.isInteger(lawFirmId) || lawFirmId <= 0) {
-                skipped++;
-                errors.push(`Skipping record with invalid law_firm_id: ${lawFirmIdRaw || "<empty>"}`);
-                continue;
-            }
-            contacts.push({
-                contact_id: contactId,
-                first_name: record[cols.FIRST_NAME],
-                last_name: record[cols.LAST_NAME],
-                program: record[cols.PROGRAM],
-                email_address: record[cols.EMAIL_ADDRESS],
-                phone: record[cols.PHONE],
-                contact_created_date: record[cols.CONTACT_CREATED_DATE],
-                law_firm_id: lawFirmId,
-                law_firm_name: record[cols.LAW_FIRM_NAME],
-            });
+            contacts.push(validation.sanitizedData);
         }
         // Perform bulk upsert within a transaction to prevent race conditions (#4)
         const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
@@ -117,10 +111,10 @@ export class CsvService {
             cols.CONTACT_ID,
             cols.FIRST_NAME,
             cols.LAST_NAME,
-            cols.PROGRAM,
+            cols.CLIENT_ID,
+            cols.CLIENT_NAME,
             cols.EMAIL_ADDRESS,
             cols.PHONE,
-            cols.CONTACT_CREATED_DATE,
             cols.LAW_FIRM_ID,
             cols.LAW_FIRM_NAME,
         ];
@@ -128,10 +122,10 @@ export class CsvService {
             contact.contact_id,
             contact.first_name,
             contact.last_name,
-            contact.program,
+            contact.client_id,
+            contact.client_name,
             contact.email_address,
             contact.phone,
-            contact.contact_created_date,
             contact.law_firm_id,
             contact.law_firm_name,
         ]);
@@ -158,104 +152,6 @@ export class CsvService {
             mimeType: "text/csv; charset=utf-8",
             content: Buffer.from(csvContent, "utf-8"),
             recordCount: contacts.length,
-        };
-    }
-    /**
-     * Parse and import clients from CSV buffer
-     */
-    async importClients(fileBuffer) {
-        const clients = [];
-        const errors = [];
-        let skipped = 0;
-        const parser = parse(fileBuffer, {
-            columns: true,
-            skip_empty_lines: true,
-            trim: true,
-            quote: '"',
-            escape: '"',
-            bom: true,
-        });
-        const cols = CSV_CONFIG.CLIENT_COLUMN_NAMES;
-        for await (const record of parser) {
-            if (clients.length >= CSV_CONFIG.MAX_RECORDS_PER_BATCH) {
-                errors.push(`Batch size limit reached (${CSV_CONFIG.MAX_RECORDS_PER_BATCH} records). Additional records were not processed.`);
-                break;
-            }
-            const clientIdRaw = record[cols.CLIENT_ID]?.trim() || "";
-            const clientId = Number.parseInt(clientIdRaw, 10);
-            const clientName = record[cols.CLIENT_NAME]?.trim() || "";
-            if (!Number.isInteger(clientId) || clientId <= 0) {
-                skipped++;
-                errors.push(`Skipping record with invalid client_id: ${clientIdRaw || "<empty>"}`);
-                continue;
-            }
-            if (!clientName) {
-                skipped++;
-                errors.push(`Skipping record with empty client_name for client_id: ${clientId}`);
-                continue;
-            }
-            clients.push({
-                client_id: clientId,
-                client_name: clientName,
-            });
-        }
-        const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
-            const clientRepository = transactionalEntityManager.getRepository(Client);
-            if (clients.length === 0) {
-                return { inserted: 0, updated: 0 };
-            }
-            const clientIds = clients.map((client) => client.client_id);
-            const existingClients = await clientRepository.find({
-                select: ["client_id"],
-                where: clientIds.map((id) => ({ client_id: id })),
-            });
-            const existingClientIds = new Set(existingClients.map((client) => client.client_id));
-            const inserted = clients.filter((client) => !existingClientIds.has(client.client_id)).length;
-            const updated = clients.length - inserted;
-            await clientRepository.upsert(clients, ["client_id"]);
-            return { inserted, updated };
-        });
-        const csvImportResult = {
-            totalRecords: clients.length + skipped,
-            inserted: result.inserted,
-            updated: result.updated,
-            skipped,
-            errors,
-        };
-        return csvImportResult;
-    }
-    /**
-     * Export clients from the database to CSV format
-     */
-    async exportClients() {
-        const clientRepository = this.dataSource.getRepository(Client);
-        const clients = await clientRepository.find({ order: { client_id: "ASC" } });
-        const cols = CSV_CONFIG.CLIENT_COLUMN_NAMES;
-        const headers = [cols.CLIENT_ID, cols.CLIENT_NAME];
-        const rows = clients.map((client) => [client.client_id, client.client_name]);
-        const csvLines = [
-            headers.join(","),
-            ...rows.map((row) => row.map((value) => this.escapeCsvValue(value)).join(",")),
-        ];
-        const csvContent = `\uFEFF${csvLines.join("\r\n")}`;
-        const now = new Date();
-        const timestamp = [
-            now.getFullYear(),
-            String(now.getMonth() + 1).padStart(2, "0"),
-            String(now.getDate()).padStart(2, "0"),
-        ].join("-") +
-            "_" +
-            [
-                String(now.getHours()).padStart(2, "0"),
-                String(now.getMinutes()).padStart(2, "0"),
-                String(now.getSeconds()).padStart(2, "0"),
-                String(now.getMilliseconds()).padStart(3, "0"),
-            ].join("-");
-        return {
-            filename: `clients-export-${timestamp}.csv`,
-            mimeType: "text/csv; charset=utf-8",
-            content: Buffer.from(csvContent, "utf-8"),
-            recordCount: clients.length,
         };
     }
     escapeCsvValue(value = "") {

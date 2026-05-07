@@ -2,7 +2,7 @@
 
 // Server Configuration
 export const SERVER_CONFIG = {
-  DEFAULT_PORT: 3000,
+  DEFAULT_PORT: 3005,
   MAX_REQUEST_SIZE: "10mb",
   REQUEST_TIMEOUT_MS: 30000, // 30 seconds
 } as const;
@@ -21,16 +21,12 @@ export const CSV_CONFIG = {
     CONTACT_ID: "contact_id",
     FIRST_NAME: "first_name",
     LAST_NAME: "last_name",
-    PROGRAM: "program",
-    EMAIL_ADDRESS: "email_address",
-    PHONE: "phone",
-    CONTACT_CREATED_DATE: "contact_created_date",
-    LAW_FIRM_ID: "law_firm_id",
-    LAW_FIRM_NAME: "law_firm_name",
-  },
-  CLIENT_COLUMN_NAMES: {
     CLIENT_ID: "client_id",
     CLIENT_NAME: "client_name",
+    EMAIL_ADDRESS: "email_address",
+    PHONE: "phone",
+    LAW_FIRM_ID: "law_firm_id",
+    LAW_FIRM_NAME: "law_firm_name",
   },
 } as const;
 
@@ -45,10 +41,10 @@ export const VALIDATION = {
     "contact_id",
     "first_name",
     "last_name",
-    "program",
+    "client_id",
+    "client_name",
     "email_address",
     "phone",
-    "contact_created_date",
     "law_firm_id",
     "law_firm_name",
   ] as const,
@@ -67,15 +63,10 @@ export const HTTP_STATUS = {
 // Error Messages
 export const ERROR_MESSAGES = {
   INVALID_CONTACT_ID: "Contact ID must be a positive integer",
-  INVALID_CLIENT_ID: "Client ID must be a positive integer",
   INVALID_ID: "Invalid ID",
-  INVALID_DATE_FORMAT: "Contact Created Date must be in MM/DD/YYYY format",
-  MISSING_REQUIRED_FIELDS:
-    "Contact ID, First Name, Last Name, Email Address, Contact Created Date, Law Firm ID, and Law Firm Name are required",
+  MISSING_REQUIRED_FIELDS: "Contact ID, First Name, and Last Name are required",
   CONTACT_NOT_FOUND: "Contact not found",
-  CLIENT_NOT_FOUND: "Client ID not found",
   CONTACT_ID_EXISTS: "Contact ID already exists. Please choose a different ID.",
-  CLIENT_ID_EXISTS: "Client ID already exists",
   NO_FILE_UPLOADED: "No file uploaded",
   FAILED_TO_FETCH: "Failed to fetch data",
   FAILED_TO_PROCESS: "Failed to process request",

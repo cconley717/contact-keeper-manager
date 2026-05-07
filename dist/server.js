@@ -5,9 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { DataSource } from "typeorm";
 import { Contact } from "./entities/Contact.js";
-import { Client } from "./entities/Client.js";
 import { createContactsRouter } from "./routes/contacts.js";
-import { createClientsRouter } from "./routes/clients.js";
 import { SERVER_CONFIG, CSV_CONFIG } from "./constants.js";
 import { validatePort } from "./utils/validation.js";
 // ESM equivalent of __dirname
@@ -30,7 +28,7 @@ const AppDataSource = new DataSource({
     autoSave: true, // Auto-save to disk after changes
     synchronize: true,
     logging: false,
-    entities: [Contact, Client],
+    entities: [Contact],
 });
 // Middleware
 app.use(express.json({ limit: SERVER_CONFIG.MAX_REQUEST_SIZE }));
@@ -43,9 +41,7 @@ try {
     console.log("Database initialized successfully");
     // Mount route modules
     const contactsRouter = createContactsRouter(AppDataSource, upload);
-    const clientsRouter = createClientsRouter(AppDataSource, upload);
     app.use("/api/contacts", contactsRouter);
-    app.use("/api/clients", clientsRouter);
     const server = app.listen(PORT, () => {
         console.log(`Server running on http://localhost:${PORT}`);
     });

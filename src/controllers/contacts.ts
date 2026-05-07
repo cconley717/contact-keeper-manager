@@ -50,14 +50,12 @@ export class ContactsController {
           .where("CAST(contact.contact_id AS TEXT) LIKE :search", { search: searchParam })
           .orWhere("contact.first_name LIKE :search", { search: searchParam })
           .orWhere("contact.last_name LIKE :search", { search: searchParam })
-          .orWhere("contact.program LIKE :search", { search: searchParam })
+          .orWhere("contact.client_id LIKE :search", { search: searchParam })
+          .orWhere("contact.client_name LIKE :search", { search: searchParam })
           .orWhere("contact.email_address LIKE :search", {
             search: searchParam,
           })
           .orWhere("contact.phone LIKE :search", { search: searchParam })
-          .orWhere("contact.contact_created_date LIKE :search", {
-            search: searchParam,
-          })
           .orWhere("CAST(contact.law_firm_id AS TEXT) LIKE :search", { search: searchParam })
           .orWhere("contact.law_firm_name LIKE :search", {
             search: searchParam,
@@ -149,8 +147,6 @@ export class ContactsController {
     try {
       const createContactDto = req.body;
 
-      createContactDto.contact_created_date = this.getCurrentDateString();
-
       const validation = validateContactData(createContactDto);
 
       if (!validation.isValid) {
@@ -199,18 +195,6 @@ export class ContactsController {
       const contactId = Number.parseInt(contactIdParam, 10);
 
       const updateContactDto = req.body;
-
-      const contactRepository = this.dataSource.getRepository(Contact);
-      const existingContactForDate = await contactRepository.findOne({
-        where: { contact_id: contactId },
-      });
-
-      if (!existingContactForDate) {
-        return ResponseBuilder.notFound(res, ERROR_MESSAGES.CONTACT_NOT_FOUND);
-      }
-
-      // Always ignore client-provided created date and preserve stored value
-      updateContactDto.contact_created_date = existingContactForDate.contact_created_date;
 
       const validation = validateContactData(updateContactDto);
 
@@ -309,14 +293,5 @@ export class ContactsController {
         ResponseBuilder.internalError(res, new Error("An unknown error occurred"));
       }
     }
-  }
-
-  private getCurrentDateString(): string {
-    const now = new Date();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-    const year = String(now.getFullYear());
-
-    return `${month}/${day}/${year}`;
   }
 }

@@ -44,33 +44,28 @@
             <input type="text" id="updateLastName" class="form-input" required />
           </div>
           <div>
-            <label class="form-label" for="updateProgram">Program</label>
-            <input type="text" id="updateProgram" class="form-input" />
+            <label class="form-label" for="updateClientId">Client ID(s)</label>
+            <input type="text" id="updateClientId" class="form-input" />
           </div>
           <div>
-            <label class="form-label" for="updateEmail">Email Address *</label>
-            <input type="email" id="updateEmail" class="form-input" required />
+            <label class="form-label" for="updateClientName">Client Name(s)</label>
+            <input type="text" id="updateClientName" class="form-input" />
           </div>
           <div>
-            <label class="form-label" for="updatePhone">Phone</label>
+            <label class="form-label" for="updateEmail">Email Address(s)</label>
+            <input type="text" id="updateEmail" class="form-input" />
+          </div>
+          <div>
+            <label class="form-label" for="updatePhone">Phone(s)</label>
             <input type="tel" id="updatePhone" class="form-input" />
           </div>
           <div>
-            <label class="form-label" for="updateLawFirmId">Law Firm ID *</label>
-            <input id="updateLawFirmId" class="form-input"
-              type="number"
-              min="1"
-              step="1"
-              required
-            />
+            <label class="form-label" for="updateLawFirmId">Law Firm ID</label>
+            <input id="updateLawFirmId" class="form-input" type="text" />
           </div>
           <div>
-            <label class="form-label" for="updateLawFirmName">Law Firm Name *</label>
-            <input type="text" id="updateLawFirmName" class="form-input" required />
-          </div>
-          <div>
-            <label class="form-label" for="updateCreatedDate">Contact Created Date *</label>
-            <input type="text" id="updateCreatedDate" class="form-input" required />
+            <label class="form-label" for="updateLawFirmName">Law Firm Name</label>
+            <input type="text" id="updateLawFirmName" class="form-input" />
           </div>
         </div>
         <div class="modal-actions">
@@ -102,7 +97,7 @@
         <div id="downloadMessage"></div>
       </div>
 
-      <!-- Add New Contact and Client ID Management (Side-by-Side) -->
+      <!-- Add New Contact -->
       <div class="side-by-side-container">
         <!-- Add New Contact Section -->
         <div class="side-by-side-item">
@@ -130,72 +125,32 @@
                 <input type="text" id="newLastName" class="form-input" required />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newProgram">Program</label>
-                <input type="text" id="newProgram" class="form-input" />
+                <label class="form-label" for="newClientId">Client ID(s)</label>
+                <input type="text" id="newClientId" class="form-input" />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newEmail">Email Address *</label>
-                <input type="email" id="newEmail" class="form-input" required />
+                <label class="form-label" for="newClientName">Client Name(s)</label>
+                <input type="text" id="newClientName" class="form-input" />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newPhone">Phone</label>
+                <label class="form-label" for="newEmail">Email Address(s)</label>
+                <input type="text" id="newEmail" class="form-input" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="newPhone">Phone(s)</label>
                 <input type="text" id="newPhone" class="form-input" />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newLawFirmId">Law Firm ID *</label>
-                <input id="newLawFirmId" class="form-input"
-                  type="number"
-                  min="1"
-                  step="1"
-                  required
-                />
+                <label class="form-label" for="newLawFirmId">Law Firm ID</label>
+                <input id="newLawFirmId" class="form-input" type="text" />
               </div>
               <div class="form-field">
-                <label class="form-label" for="newLawFirmName">Law Firm Name *</label>
-                <input type="text" id="newLawFirmName" class="form-input" required />
+                <label class="form-label" for="newLawFirmName">Law Firm Name</label>
+                <input type="text" id="newLawFirmName" class="form-input" />
               </div>
             </div>
             <button id="addContactBtn" class="btn-success btn-large">Add Contact</button>
             <div id="addContactMessage"></div>
-          </div>
-        </div>
-
-        <!-- Add Client ID Section -->
-        <div class="side-by-side-item">
-          <h2 class="collapsible-header" id="addClientToggle">
-            <span id="addClientIcon" class="collapsible-icon">▶</span>
-            Manage Clients
-          </h2>
-          <div id="addClientForm" class="collapsible-content">
-            <div class="form-grid">
-              <div class="form-field">
-                <label class="form-label" for="newClientIdInput">Client ID *</label>
-                <input id="newClientIdInput" class="form-input"
-                  type="number"
-                  min="1"
-                  step="1"
-                  required
-                />
-              </div>
-              <div class="form-field">
-                <label class="form-label" for="newClientNameInput">Client Name *</label>
-                <input type="text" id="newClientNameInput" class="form-input" required />
-              </div>
-            </div>
-            <button id="addClientIdBtn" class="btn-success btn-large">Add Client</button>
-
-            <div class="client-csv-actions">
-              <input type="file" id="clientCsvFile" accept=".csv" class="hidden" />
-              <button id="importClientCsvBtn" class="btn-primary btn-large">Import</button>
-              <button id="exportClientCsvBtn" class="btn-primary btn-large">Export</button>
-            </div>
-
-            <div id="clientCsvMessage"></div>
-
-            <div id="addClientMessage"></div>
-
-            <!-- List of existing client IDs -->
-            <div id="clientIdList" class="client-list"></div>
           </div>
         </div>
       </div>
@@ -226,7 +181,17 @@
           <tbody>
             <tr>
               <th>Client ID</th>
-              <td><select data-field="client_id" id="outputClientIdSelect"></select></td>
+              <td>
+                <input type="text" data-field="client_id" id="outputClientId" readonly />
+                <select data-field="client_id" id="outputClientIdSelect" style="display: none"></select>
+              </td>
+            </tr>
+            <tr>
+              <th>Client Name</th>
+              <td>
+                <input type="text" data-field="client_name" id="outputClientName" readonly />
+                <select data-field="client_name" id="outputClientNameSelect" style="display: none"></select>
+              </td>
             </tr>
             <tr>
               <th>Contact ID</th>
@@ -261,7 +226,7 @@
             </tr>
             <tr>
               <th>Firm ID(s)</th>
-              <td><input type="number" data-field="law_firm_id" min="1" step="1" /></td>
+              <td><input type="text" data-field="law_firm_id" /></td>
             </tr>
             <tr>
               <th>Claimant ID(s)</th>

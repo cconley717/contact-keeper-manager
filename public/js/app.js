@@ -15,10 +15,10 @@ const CONFIG = {
     CONTACT_ID: 130,
     FIRST_NAME: 140,
     LAST_NAME: 140,
-    PROGRAM: 180,
+    CLIENT_ID: 130,
+    CLIENT_NAME: 220,
     EMAIL_ADDRESS: 220,
     PHONE: 150,
-    CREATED_DATE: 150,
     LAW_FIRM_ID: 150,
     LAW_FIRM_NAME: 200,
   },
@@ -55,19 +55,109 @@ function showMessage(elementId, message, type, timeout = CONFIG.MESSAGE_TIMEOUT_
   }, timeout);
 }
 
-/**
- * Update client dropdown display - show full text when open, ID only when closed
- */
-function updateClientSelectDisplay(selectElement, isOpen) {
-  for (const option of selectElement.options) {
-    if (option.value && option.dataset.fullText && option.dataset.idOnly) {
-      if (isOpen || !option.selected) {
-        option.textContent = option.dataset.fullText;
-      } else {
-        option.textContent = option.dataset.idOnly;
-      }
-    }
+function parseCsvList(value) {
+  if (!value) {
+    return [];
   }
+
+  return String(value)
+    .split(/[;,]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+}
+
+function normalizeCsvList(value) {
+  return parseCsvList(value).join(", ");
+}
+
+function getOutputClientIdValue() {
+  const outputClientId = document.getElementById("outputClientId");
+  const outputClientIdSelect = document.getElementById("outputClientIdSelect");
+
+  if (outputClientIdSelect.style.display !== "none") {
+    return outputClientIdSelect.value;
+  }
+
+  return outputClientId.value;
+}
+
+function getOutputClientNameValue() {
+  const outputClientName = document.getElementById("outputClientName");
+  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
+
+  if (outputClientNameSelect.style.display !== "none") {
+    return outputClientNameSelect.value;
+  }
+
+  return outputClientName.value;
+}
+
+function setOutputClientFields(clientIdValue, clientNameValue) {
+  const outputClientId = document.getElementById("outputClientId");
+  const outputClientIdSelect = document.getElementById("outputClientIdSelect");
+  const outputClientName = document.getElementById("outputClientName");
+  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
+
+  const clientIds = parseCsvList(clientIdValue);
+  const clientNames = parseCsvList(clientNameValue);
+
+  outputClientIdSelect.innerHTML = "";
+  outputClientNameSelect.innerHTML = "";
+
+  if (clientIds.length > 1) {
+    outputClientId.style.display = "none";
+    outputClientIdSelect.style.display = "";
+    outputClientId.value = "";
+
+    const blankOption = document.createElement("option");
+    blankOption.value = "";
+    blankOption.textContent = "";
+    outputClientIdSelect.appendChild(blankOption);
+
+    for (let index = 0; index < clientIds.length; index++) {
+      const option = document.createElement("option");
+      option.value = clientIds[index];
+      option.textContent = clientIds[index];
+      option.dataset.clientName = clientNames[index] || "";
+      option.dataset.pairIndex = String(index);
+      outputClientIdSelect.appendChild(option);
+    }
+
+    outputClientIdSelect.value = "";
+    outputClientName.value = "";
+  } else {
+    outputClientId.style.display = "";
+    outputClientIdSelect.style.display = "none";
+    outputClientId.value = clientIds[0] || String(clientIdValue || "");
+  }
+
+  if (clientNames.length > 1) {
+    outputClientName.style.display = "none";
+    outputClientNameSelect.style.display = "";
+    outputClientName.value = "";
+
+    const blankNameOption = document.createElement("option");
+    blankNameOption.value = "";
+    blankNameOption.textContent = "";
+    outputClientNameSelect.appendChild(blankNameOption);
+
+    for (let index = 0; index < clientNames.length; index++) {
+      const name = clientNames[index];
+      const option = document.createElement("option");
+      option.value = name;
+      option.textContent = name;
+      option.dataset.clientId = clientIds[index] || "";
+      option.dataset.pairIndex = String(index);
+      outputClientNameSelect.appendChild(option);
+    }
+
+    outputClientNameSelect.value = "";
+    return;
+  }
+
+  outputClientName.style.display = "";
+  outputClientNameSelect.style.display = "none";
+  outputClientName.value = clientNames[0] || String(clientNameValue || "");
 }
 
 // ============================================================================
@@ -97,10 +187,10 @@ function createGridColumnDefs() {
     { field: "contact_id", headerName: "Contact ID", width: CONFIG.COLUMN_WIDTHS.CONTACT_ID, filter: true, sortable: true },
     { field: "first_name", headerName: "First Name", width: CONFIG.COLUMN_WIDTHS.FIRST_NAME, filter: true, sortable: true },
     { field: "last_name", headerName: "Last Name", width: CONFIG.COLUMN_WIDTHS.LAST_NAME, filter: true, sortable: true },
-    { field: "program", headerName: "Program", width: CONFIG.COLUMN_WIDTHS.PROGRAM, filter: true, sortable: true },
+    { field: "client_id", headerName: "Client ID", width: CONFIG.COLUMN_WIDTHS.CLIENT_ID, filter: true, sortable: true },
+    { field: "client_name", headerName: "Client Name", width: CONFIG.COLUMN_WIDTHS.CLIENT_NAME, filter: true, sortable: true },
     { field: "email_address", headerName: "Email Address", width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS, filter: true, sortable: true },
     { field: "phone", headerName: "Phone", width: CONFIG.COLUMN_WIDTHS.PHONE, filter: true, sortable: true },
-    { field: "contact_created_date", headerName: "Created Date", width: CONFIG.COLUMN_WIDTHS.CREATED_DATE, filter: true, sortable: true },
     { field: "law_firm_id", headerName: "Law Firm ID", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID, filter: true, sortable: true },
     { field: "law_firm_name", headerName: "Law Firm", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME, filter: true, sortable: true },
   ];
@@ -114,6 +204,7 @@ function handleGridActionClick(params) {
   const target = params.event.target;
 
   if (target.classList.contains("select-btn")) {
+    setOutputClientFields(rowData.client_id, rowData.client_name);
     document.querySelector('.output-section input[data-field="contact_id"]').value = rowData.contact_id || "";
     document.querySelector('.output-section input[data-field="law_firm_id"]').value = rowData.law_firm_id || "";
   } else if (target.classList.contains("update-btn")) {
@@ -271,7 +362,8 @@ function clearContactForm() {
   document.getElementById("newContactId").value = "";
   document.getElementById("newFirstName").value = "";
   document.getElementById("newLastName").value = "";
-  document.getElementById("newProgram").value = "";
+  document.getElementById("newClientId").value = "";
+  document.getElementById("newClientName").value = "";
   document.getElementById("newEmail").value = "";
   document.getElementById("newPhone").value = "";
   document.getElementById("newLawFirmId").value = "";
@@ -291,10 +383,10 @@ function openUpdateModal(contactData) {
   document.getElementById("updateContactId").value = contactData.contact_id || "";
   document.getElementById("updateFirstName").value = contactData.first_name || "";
   document.getElementById("updateLastName").value = contactData.last_name || "";
-  document.getElementById("updateProgram").value = contactData.program || "";
+  document.getElementById("updateClientId").value = contactData.client_id || "";
+  document.getElementById("updateClientName").value = contactData.client_name || "";
   document.getElementById("updateEmail").value = contactData.email_address || "";
   document.getElementById("updatePhone").value = contactData.phone || "";
-  document.getElementById("updateCreatedDate").value = contactData.contact_created_date || "";
   document.getElementById("updateLawFirmId").value = contactData.law_firm_id || "";
   document.getElementById("updateLawFirmName").value = contactData.law_firm_name || "";
 
@@ -317,10 +409,10 @@ async function saveUpdatedContact() {
     contact_id: document.getElementById("updateContactId").value.trim(),
     first_name: document.getElementById("updateFirstName").value.trim(),
     last_name: document.getElementById("updateLastName").value.trim(),
-    program: document.getElementById("updateProgram").value.trim(),
-    email_address: document.getElementById("updateEmail").value.trim(),
-    phone: document.getElementById("updatePhone").value.trim(),
-    contact_created_date: document.getElementById("updateCreatedDate").value.trim(),
+    client_id: normalizeCsvList(document.getElementById("updateClientId").value),
+    client_name: normalizeCsvList(document.getElementById("updateClientName").value),
+    email_address: normalizeCsvList(document.getElementById("updateEmail").value),
+    phone: normalizeCsvList(document.getElementById("updatePhone").value),
     law_firm_id: document.getElementById("updateLawFirmId").value.trim(),
     law_firm_name: document.getElementById("updateLawFirmName").value.trim(),
   };
@@ -329,11 +421,7 @@ async function saveUpdatedContact() {
   if (
     !contactData.contact_id ||
     !contactData.first_name ||
-    !contactData.last_name ||
-    !contactData.email_address ||
-    !contactData.contact_created_date ||
-    !contactData.law_firm_id ||
-    !contactData.law_firm_name
+    !contactData.last_name
   ) {
     alert("Please fill in all required fields (marked with *)");
     return;
@@ -346,195 +434,6 @@ async function saveUpdatedContact() {
 globalThis.openUpdateModal = openUpdateModal;
 globalThis.closeUpdateModal = closeUpdateModal;
 globalThis.saveUpdatedContact = saveUpdatedContact;
-
-// ============================================================================
-// CLIENT MANAGEMENT
-// ============================================================================
-
-/**
- * Load clients from server and populate UI
- */
-async function loadClients() {
-  try {
-    const response = await fetch("/api/clients");
-    const result = await response.json();
-    const clients = result.data || result;
-
-    populateClientDropdown(clients);
-    populateClientTable(clients);
-  } catch (error) {
-    console.error("Error loading clients:", error);
-  }
-}
-
-/**
- * Populate the output table client dropdown
- */
-function populateClientDropdown(clients) {
-  const outputSelect = document.getElementById("outputClientIdSelect");
-  outputSelect.innerHTML = "";
-
-  // Add empty default option
-  const emptyOption = document.createElement("option");
-  emptyOption.value = "";
-  emptyOption.textContent = "";
-  outputSelect.appendChild(emptyOption);
-
-  // Add client options
-  for (const client of clients) {
-    const option = document.createElement("option");
-    option.value = client.client_id;
-    const fullText = `${client.client_id} - ${client.client_name}`;
-    option.textContent = fullText;
-    option.dataset.fullText = fullText;
-    option.dataset.idOnly = client.client_id;
-    outputSelect.appendChild(option);
-  }
-}
-
-/**
- * Populate the client management table
- */
-function populateClientTable(clients) {
-  const clientList = document.getElementById("clientIdList");
-  clientList.textContent = "";
-
-  if (clients.length === 0) {
-    const noClientsMsg = document.createElement("p");
-    noClientsMsg.className = "no-clients-message";
-    noClientsMsg.textContent = "No clients yet. Add one above!";
-    clientList.appendChild(noClientsMsg);
-    return;
-  }
-
-  // Create table
-  const table = document.createElement("table");
-  table.className = "client-table";
-
-  // Create header
-  const thead = document.createElement("thead");
-  const headerRow = document.createElement("tr");
-  
-  for (const headerText of ["Client ID", "Client Name", "Actions"]) {
-    const th = document.createElement("th");
-    th.textContent = headerText;
-    headerRow.appendChild(th);
-  }
-  
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  // Create body
-  const tbody = document.createElement("tbody");
-  
-  for (const client of clients) {
-    const row = document.createElement("tr");
-
-    const idCell = document.createElement("td");
-    idCell.textContent = client.client_id;
-
-    const nameCell = document.createElement("td");
-    nameCell.textContent = client.client_name;
-
-    const actionsCell = document.createElement("td");
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "btn-danger btn-small";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.onclick = () => deleteClient(client.id, client.client_id);
-    actionsCell.appendChild(deleteBtn);
-
-    row.appendChild(idCell);
-    row.appendChild(nameCell);
-    row.appendChild(actionsCell);
-    tbody.appendChild(row);
-  }
-
-  table.appendChild(tbody);
-  clientList.appendChild(table);
-}
-
-/**
- * Add a new client
- */
-async function addClient(clientId, clientName) {
-  try {
-    const response = await fetch("/api/clients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ client_id: clientId, client_name: clientName }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage("addClientMessage", data.message, "success");
-      document.getElementById("newClientIdInput").value = "";
-      document.getElementById("newClientNameInput").value = "";
-
-      // Add to dropdown immediately
-      const newClient = data.data;
-      addClientToDropdown(newClient);
-
-      // Refresh the table
-      await loadClients();
-    } else {
-      showMessage("addClientMessage", data.message || "Failed to add client", "error");
-    }
-  } catch (error) {
-    console.error("Error adding client:", error);
-    showMessage("addClientMessage", "Failed to add client. Please try again.", "error");
-  }
-}
-
-/**
- * Add a client to the dropdown (immediate feedback)
- */
-function addClientToDropdown(client) {
-  const outputSelect = document.getElementById("outputClientIdSelect");
-  const option = document.createElement("option");
-  option.value = client.client_id;
-  const fullText = `${client.client_id} - ${client.client_name}`;
-  option.textContent = fullText;
-  option.dataset.fullText = fullText;
-  option.dataset.idOnly = client.client_id;
-
-  // Insert in sorted position
-  let inserted = false;
-  for (let i = 1; i < outputSelect.options.length; i++) {
-    if (Number.parseInt(outputSelect.options[i].value) > client.client_id) {
-      outputSelect.insertBefore(option, outputSelect.options[i]);
-      inserted = true;
-      break;
-    }
-  }
-  if (!inserted) {
-    outputSelect.appendChild(option);
-  }
-}
-
-/**
- * Delete a client
- */
-async function deleteClient(id, clientId) {
-  if (!confirm(`Delete client ID ${clientId}?`)) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/clients/${id}`, { method: "DELETE" });
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage("addClientMessage", data.message, "success");
-      await loadClients();
-    } else {
-      showMessage("addClientMessage", data.message || "Failed to delete client ID", "error");
-    }
-  } catch (error) {
-    console.error("Error deleting client:", error);
-    showMessage("addClientMessage", "Failed to delete client ID. Please try again.", "error");
-  }
-}
 
 // ============================================================================
 // SEARCH & PAGINATION
@@ -680,7 +579,7 @@ async function handleCsvDownload() {
 
     const blob = await response.blob();
     const contentDisposition = response.headers.get("content-disposition") || "";
-    const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+    const filenameMatch = /filename="?([^";]+)"?/i.exec(contentDisposition);
     const filename = filenameMatch ? filenameMatch[1] : "contacts-export.csv";
 
     const downloadUrl = URL.createObjectURL(blob);
@@ -702,103 +601,6 @@ async function handleCsvDownload() {
   }
 }
 
-/**
- * Handle clients CSV upload
- */
-async function handleClientCsvUpload(file) {
-  if (!file) {
-    showMessage("clientCsvMessage", "Please select a CSV file", "error");
-    return;
-  }
-
-  if (!file.name.endsWith(".csv")) {
-    showMessage("clientCsvMessage", "Please select a valid CSV file", "error");
-    return;
-  }
-
-  const importBtn = document.getElementById("importClientCsvBtn");
-  const formData = new FormData();
-  formData.append("file", file);
-
-  importBtn.disabled = true;
-  importBtn.textContent = "Importing...";
-
-  try {
-    const response = await fetch("/api/clients/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      showMessage("clientCsvMessage", data.message, "success");
-      document.getElementById("clientCsvFile").value = "";
-      await loadClients();
-    } else {
-      showMessage("clientCsvMessage", data.message || "Client CSV import failed", "error");
-    }
-  } catch (error) {
-    console.error("Client CSV import error:", error);
-    showMessage("clientCsvMessage", "Import failed. Please try again.", "error");
-  } finally {
-    importBtn.disabled = false;
-    importBtn.textContent = "Import CSV";
-  }
-}
-
-/**
- * Handle clients CSV download
- */
-async function handleClientCsvDownload() {
-  const exportBtn = document.getElementById("exportClientCsvBtn");
-
-  exportBtn.disabled = true;
-  exportBtn.textContent = "Exporting...";
-
-  try {
-    const response = await fetch("/api/clients/download", {
-      method: "GET",
-    });
-
-    if (!response.ok) {
-      let errorMessage = "Failed to export clients";
-
-      try {
-        const errorData = await response.json();
-        errorMessage = errorData.message || errorMessage;
-      } catch {
-        // Ignore JSON parse failures and keep default error message
-      }
-
-      showMessage("clientCsvMessage", errorMessage, "error");
-      return;
-    }
-
-    const blob = await response.blob();
-    const contentDisposition = response.headers.get("content-disposition") || "";
-    const filenameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
-    const filename = filenameMatch ? filenameMatch[1] : "clients-export.csv";
-
-    const downloadUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = downloadUrl;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(downloadUrl);
-
-    showMessage("clientCsvMessage", "Clients CSV export completed successfully", "success");
-  } catch (error) {
-    console.error("Client CSV export error:", error);
-    showMessage("clientCsvMessage", "Export failed. Please try again.", "error");
-  } finally {
-    exportBtn.disabled = false;
-    exportBtn.textContent = "Export CSV";
-  }
-}
-
 // ============================================================================
 // CLIPBOARD OPERATIONS
 // ============================================================================
@@ -808,7 +610,8 @@ async function handleClientCsvDownload() {
  */
 async function copyOutputToClipboard() {
   try {
-    const clientId = document.querySelector('.output-section select[data-field="client_id"]').value;
+    const clientId = getOutputClientIdValue();
+    const clientName = getOutputClientNameValue();
     const contactId = document.querySelector('.output-section input[data-field="contact_id"]').value;
     const topic = document.querySelector('.output-section select[data-field="topic"]').value;
     const firmId = document.querySelector('.output-section input[data-field="law_firm_id"]').value;
@@ -825,6 +628,10 @@ async function copyOutputToClipboard() {
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Client ID</td>
       <td style="border: 1px solid #000; padding: 4px;">${clientId}</td>
+    </tr>
+    <tr>
+      <td style="border: 1px solid #000; padding: 4px;">Client Name</td>
+      <td style="border: 1px solid #000; padding: 4px;">${clientName}</td>
     </tr>
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Contact ID</td>
@@ -864,6 +671,7 @@ async function copyOutputToClipboard() {
     // Create plain text version
     const plainText = [
       ["Client ID", clientId],
+      ["Client Name", clientName],
       ["Contact ID", contactId],
       ["Topic", topic],
       ["Firm ID(s)", firmId],
@@ -936,63 +744,52 @@ function setupEventListeners() {
 
   // Collapsible form toggles
   setupCollapsibleToggle("addContactToggle", "addContactForm", "addContactIcon");
-  setupCollapsibleToggle("addClientToggle", "addClientForm", "addClientIcon");
 
-  // Client dropdown display logic
   const outputClientIdSelect = document.getElementById("outputClientIdSelect");
-  outputClientIdSelect.addEventListener("click", function () {
-    const isOpen = this.classList.contains("select-open");
-    this.classList.toggle("select-open");
-    updateClientSelectDisplay(this, !isOpen);
-  });
+  const outputClientName = document.getElementById("outputClientName");
+  const outputClientId = document.getElementById("outputClientId");
+  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
+  outputClientIdSelect.addEventListener("change", function () {
+    const selectedOption = this.options[this.selectedIndex];
 
-  outputClientIdSelect.addEventListener("blur", function () {
-    if (this.classList.contains("select-open")) {
-      this.classList.remove("select-open");
-      updateClientSelectDisplay(this, false);
-    }
-  });
+    if (outputClientNameSelect.style.display !== "none") {
+      const pairIndex = selectedOption?.dataset?.pairIndex;
+      if (!pairIndex) {
+        outputClientNameSelect.value = "";
+        outputClientName.value = "";
+        return;
+      }
 
-  // Add client button
-  const addClientIdBtn = document.getElementById("addClientIdBtn");
-  addClientIdBtn.addEventListener("click", async function () {
-    const clientId = document.getElementById("newClientIdInput").value.trim();
-    const clientName = document.getElementById("newClientNameInput").value.trim();
-
-    if (!clientId) {
-      showMessage("addClientMessage", "Please enter a client ID", "error");
+      const pairedNameOption = Array.from(outputClientNameSelect.options).find(
+        (option) => option.dataset.pairIndex === pairIndex
+      );
+      outputClientNameSelect.value = pairedNameOption ? pairedNameOption.value : "";
+      outputClientName.value = outputClientNameSelect.value;
       return;
     }
 
-    if (!clientName) {
-      showMessage("addClientMessage", "Please enter a client name", "error");
+    outputClientName.value = selectedOption?.dataset?.clientName || "";
+  });
+
+  outputClientNameSelect.addEventListener("change", function () {
+    if (outputClientIdSelect.style.display === "none") {
       return;
     }
 
-    addClientIdBtn.disabled = true;
-    addClientIdBtn.textContent = "Adding...";
+    const selectedOption = this.options[this.selectedIndex];
+    const pairIndex = selectedOption?.dataset?.pairIndex;
+    if (!pairIndex) {
+      outputClientIdSelect.value = "";
+      outputClientId.value = "";
+      return;
+    }
 
-    await addClient(clientId, clientName);
-
-    addClientIdBtn.disabled = false;
-    addClientIdBtn.textContent = "Add Client";
+    const pairedIdOption = Array.from(outputClientIdSelect.options).find(
+      (option) => option.dataset.pairIndex === pairIndex
+    );
+    outputClientIdSelect.value = pairedIdOption ? pairedIdOption.value : "";
+    outputClientId.value = outputClientIdSelect.value;
   });
-
-  // Client CSV buttons
-  const clientCsvFile = document.getElementById("clientCsvFile");
-  const importClientCsvBtn = document.getElementById("importClientCsvBtn");
-  const exportClientCsvBtn = document.getElementById("exportClientCsvBtn");
-
-  importClientCsvBtn.addEventListener("click", function () {
-    clientCsvFile.click();
-  });
-
-  clientCsvFile.addEventListener("change", async function () {
-    const file = this.files[0];
-    await handleClientCsvUpload(file);
-  });
-
-  exportClientCsvBtn.addEventListener("click", handleClientCsvDownload);
 
   // Add contact button
   const addContactBtn = document.getElementById("addContactBtn");
@@ -1001,9 +798,10 @@ function setupEventListeners() {
       contact_id: document.getElementById("newContactId").value.trim(),
       first_name: document.getElementById("newFirstName").value.trim(),
       last_name: document.getElementById("newLastName").value.trim(),
-      program: document.getElementById("newProgram").value.trim(),
-      email_address: document.getElementById("newEmail").value.trim(),
-      phone: document.getElementById("newPhone").value.trim(),
+      client_id: normalizeCsvList(document.getElementById("newClientId").value),
+      client_name: normalizeCsvList(document.getElementById("newClientName").value),
+      email_address: normalizeCsvList(document.getElementById("newEmail").value),
+      phone: normalizeCsvList(document.getElementById("newPhone").value),
       law_firm_id: document.getElementById("newLawFirmId").value.trim(),
       law_firm_name: document.getElementById("newLawFirmName").value.trim(),
     };
@@ -1012,14 +810,11 @@ function setupEventListeners() {
     if (
       !contactData.contact_id ||
       !contactData.first_name ||
-      !contactData.last_name ||
-      !contactData.email_address ||
-      !contactData.law_firm_id ||
-      !contactData.law_firm_name
+      !contactData.last_name
     ) {
       showMessage(
         "addContactMessage",
-        "Contact ID, First Name, Last Name, Email Address, Law Firm ID, and Law Firm Name are required",
+        "Contact ID, First Name, and Last Name are required",
         "error"
       );
       return;
@@ -1083,7 +878,7 @@ async function initializeApp() {
   initializeGrid();
 
   // Load initial data
-  await loadClients();
+  setOutputClientFields("", "");
 
   // Setup event listeners
   setupEventListeners();

@@ -15,7 +15,11 @@ export class Contact {
 
   @Index()
   @Column("text", { default: "" })
-  program: string = "";
+  client_id: string = "";
+
+  @Index()
+  @Column("text", { default: "" })
+  client_name: string = "";
 
   @Index()
   @Column("text", { default: "" })
@@ -27,11 +31,7 @@ export class Contact {
 
   @Index()
   @Column("text", { default: "" })
-  contact_created_date: string = "";
-
-  @Index()
-  @Column("integer", { default: 0 })
-  law_firm_id: number = 0;
+  law_firm_id: string = "";
 
   @Index()
   @Column("text", { default: "" })

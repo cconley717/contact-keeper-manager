@@ -12,11 +12,11 @@ let Contact = class Contact {
     contact_id;
     first_name = "";
     last_name = "";
-    program = "";
+    client_id = "";
+    client_name = "";
     email_address = "";
     phone = "";
-    contact_created_date = "";
-    law_firm_id = 0;
+    law_firm_id = "";
     law_firm_name = "";
 };
 __decorate([
@@ -37,7 +37,12 @@ __decorate([
     Index(),
     Column("text", { default: "" }),
     __metadata("design:type", String)
-], Contact.prototype, "program", void 0);
+], Contact.prototype, "client_id", void 0);
+__decorate([
+    Index(),
+    Column("text", { default: "" }),
+    __metadata("design:type", String)
+], Contact.prototype, "client_name", void 0);
 __decorate([
     Index(),
     Column("text", { default: "" }),
@@ -52,11 +57,6 @@ __decorate([
     Index(),
     Column("text", { default: "" }),
     __metadata("design:type", String)
-], Contact.prototype, "contact_created_date", void 0);
-__decorate([
-    Index(),
-    Column("integer", { default: 0 }),
-    __metadata("design:type", Number)
 ], Contact.prototype, "law_firm_id", void 0);
 __decorate([
     Index(),

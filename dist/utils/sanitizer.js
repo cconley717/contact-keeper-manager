@@ -4,6 +4,14 @@ import { VALIDATION } from "../constants.js";
  * Sanitize and validate user input to prevent XSS and injection attacks
  */
 export class InputSanitizer {
+    static parseDelimitedList(value) {
+        if (!value)
+            return [];
+        return value
+            .split(/[;,]/)
+            .map((entry) => entry.trim())
+            .filter((entry) => entry.length > 0);
+    }
     /**
      * Sanitize a string by escaping HTML and trimming whitespace
      */
@@ -27,13 +35,20 @@ export class InputSanitizer {
     static sanitizeEmail(email) {
         if (!email)
             return "";
-        const trimmed = email.trim().toLowerCase();
-        // Validate email format
-        if (!validator.isEmail(trimmed)) {
+        const emails = this.parseDelimitedList(email);
+        if (emails.length === 0) {
             return "";
         }
-        // Normalize and escape
-        return validator.normalizeEmail(trimmed) || trimmed;
+        const normalizedEmails = [];
+        for (const item of emails) {
+            const normalizedInput = item.toLowerCase();
+            // Validate each email in the delimited list
+            if (!validator.isEmail(normalizedInput)) {
+                return "";
+            }
+            normalizedEmails.push(validator.normalizeEmail(normalizedInput) || normalizedInput);
+        }
+        return normalizedEmails.join(", ");
     }
     /**
      * Sanitize and validate phone format (#41)
@@ -41,10 +56,14 @@ export class InputSanitizer {
     static sanitizePhone(phone) {
         if (!phone)
             return "";
-        const trimmed = phone.trim();
-        // Allow only valid phone number characters
-        const cleaned = trimmed.replaceAll(/[^\d\s\-()+]/g, "");
-        return cleaned || "";
+        const phones = this.parseDelimitedList(phone);
+        if (phones.length === 0) {
+            return "";
+        }
+        const cleanedPhones = phones
+            .map((item) => item.replaceAll(/[^\d\s\-()+]/g, "").trim())
+            .filter((item) => item.length > 0);
+        return cleanedPhones.join(", ");
     }
     /**
      * Sanitize a string representation of an integer with range validation (#47)
@@ -82,11 +101,11 @@ export class InputSanitizer {
             contact_id: this.sanitizeInteger(data.contact_id),
             first_name: this.sanitizeString(data.first_name),
             last_name: this.sanitizeString(data.last_name),
-            program: this.sanitizeString(data.program),
+            client_id: this.sanitizeString(data.client_id),
+            client_name: this.sanitizeString(data.client_name),
             email_address: this.sanitizeEmail(data.email_address),
             phone: this.sanitizePhone(data.phone),
-            contact_created_date: this.sanitizeDate(data.contact_created_date),
-            law_firm_id: this.sanitizeInteger(data.law_firm_id),
+            law_firm_id: this.sanitizeString(data.law_firm_id),
             law_firm_name: this.sanitizeString(data.law_firm_name),
         };
     }
