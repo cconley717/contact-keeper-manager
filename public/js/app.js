@@ -184,15 +184,69 @@ function createGridColumnDefs() {
       sortable: false,
       filter: false,
     },
-    { field: "contact_id", headerName: "Contact ID", width: CONFIG.COLUMN_WIDTHS.CONTACT_ID, filter: true, sortable: true },
-    { field: "first_name", headerName: "First Name", width: CONFIG.COLUMN_WIDTHS.FIRST_NAME, filter: true, sortable: true },
-    { field: "last_name", headerName: "Last Name", width: CONFIG.COLUMN_WIDTHS.LAST_NAME, filter: true, sortable: true },
-    { field: "client_id", headerName: "Client ID", width: CONFIG.COLUMN_WIDTHS.CLIENT_ID, filter: true, sortable: true },
-    { field: "client_name", headerName: "Client Name", width: CONFIG.COLUMN_WIDTHS.CLIENT_NAME, filter: true, sortable: true },
-    { field: "email_address", headerName: "Email Address", width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS, filter: true, sortable: true },
-    { field: "phone", headerName: "Phone", width: CONFIG.COLUMN_WIDTHS.PHONE, filter: true, sortable: true },
-    { field: "law_firm_id", headerName: "Law Firm ID", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID, filter: true, sortable: true },
-    { field: "law_firm_name", headerName: "Law Firm", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME, filter: true, sortable: true },
+    {
+      field: "contact_id",
+      headerName: "Contact ID",
+      width: CONFIG.COLUMN_WIDTHS.CONTACT_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "first_name",
+      headerName: "First Name",
+      width: CONFIG.COLUMN_WIDTHS.FIRST_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "last_name",
+      headerName: "Last Name",
+      width: CONFIG.COLUMN_WIDTHS.LAST_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "client_id",
+      headerName: "Client ID",
+      width: CONFIG.COLUMN_WIDTHS.CLIENT_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "client_name",
+      headerName: "Client Name",
+      width: CONFIG.COLUMN_WIDTHS.CLIENT_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "email_address",
+      headerName: "Email Address",
+      width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "phone",
+      headerName: "Phone",
+      width: CONFIG.COLUMN_WIDTHS.PHONE,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "law_firm_id",
+      headerName: "Law Firm ID",
+      width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "law_firm_name",
+      headerName: "Law Firm",
+      width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME,
+      filter: true,
+      sortable: true,
+    },
   ];
 }
 
@@ -205,8 +259,10 @@ function handleGridActionClick(params) {
 
   if (target.classList.contains("select-btn")) {
     setOutputClientFields(rowData.client_id, rowData.client_name);
-    document.querySelector('.output-section input[data-field="contact_id"]').value = rowData.contact_id || "";
-    document.querySelector('.output-section input[data-field="law_firm_id"]').value = rowData.law_firm_id || "";
+    document.querySelector('.output-section input[data-field="contact_id"]').value =
+      rowData.contact_id || "";
+    document.querySelector('.output-section input[data-field="law_firm_id"]').value =
+      rowData.law_firm_id || "";
   } else if (target.classList.contains("update-btn")) {
     openUpdateModal(rowData);
   } else if (target.classList.contains("delete-btn")) {
@@ -418,11 +474,7 @@ async function saveUpdatedContact() {
   };
 
   // Validation
-  if (
-    !contactData.contact_id ||
-    !contactData.first_name ||
-    !contactData.last_name
-  ) {
+  if (!contactData.contact_id || !contactData.first_name || !contactData.last_name) {
     alert("Please fill in all required fields (marked with *)");
     return;
   }
@@ -612,13 +664,21 @@ async function copyOutputToClipboard() {
   try {
     const clientId = getOutputClientIdValue();
     const clientName = getOutputClientNameValue();
-    const contactId = document.querySelector('.output-section input[data-field="contact_id"]').value;
+    const contactId = document.querySelector(
+      '.output-section input[data-field="contact_id"]'
+    ).value;
     const topic = document.querySelector('.output-section select[data-field="topic"]').value;
     const firmId = document.querySelector('.output-section input[data-field="law_firm_id"]').value;
-    const claimantId = document.querySelector('.output-section input[data-field="claimant_id"]').value;
-    const inboundOutbound = document.querySelector('.output-section select[data-field="inbound_outbound"]').value;
+    const claimantId = document.querySelector(
+      '.output-section input[data-field="claimant_id"]'
+    ).value;
+    const inboundOutbound = document.querySelector(
+      '.output-section select[data-field="inbound_outbound"]'
+    ).value;
     const outreach = document.querySelector('.output-section select[data-field="outreach"]').value;
-    const commMethod = document.querySelector('.output-section select[data-field="communication_method"]').value;
+    const commMethod = document.querySelector(
+      '.output-section select[data-field="communication_method"]'
+    ).value;
     const message = document.querySelector('.output-section input[data-field="message"]').value;
 
     // Create HTML table
@@ -807,11 +867,7 @@ function setupEventListeners() {
     };
 
     // Validate required fields
-    if (
-      !contactData.contact_id ||
-      !contactData.first_name ||
-      !contactData.last_name
-    ) {
+    if (!contactData.contact_id || !contactData.first_name || !contactData.last_name) {
       showMessage(
         "addContactMessage",
         "Contact ID, First Name, and Last Name are required",

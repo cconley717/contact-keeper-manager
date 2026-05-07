@@ -174,11 +174,12 @@ export class CsvService {
 
     const csvContent = `\uFEFF${csvLines.join("\r\n")}`;
     const now = new Date();
-    const timestamp = [
-      now.getFullYear(),
-      String(now.getMonth() + 1).padStart(2, "0"),
-      String(now.getDate()).padStart(2, "0"),
-    ].join("-") +
+    const timestamp =
+      [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+      ].join("-") +
       "_" +
       [
         String(now.getHours()).padStart(2, "0"),
