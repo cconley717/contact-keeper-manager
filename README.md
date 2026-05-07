@@ -32,7 +32,7 @@ npm run build
 npm start
 ```
 
-Open http://localhost:3000 in your browser.
+Open http://localhost:3005 in your browser.
 
 ## Project Structure
 
