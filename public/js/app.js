@@ -81,28 +81,13 @@ function getOutputClientIdValue() {
   return outputClientId.value;
 }
 
-function getOutputClientNameValue() {
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
-
-  if (outputClientNameSelect.style.display !== "none") {
-    return outputClientNameSelect.value;
-  }
-
-  return outputClientName.value;
-}
-
-function setOutputClientFields(clientIdValue, clientNameValue) {
+function setOutputClientFields(clientIdValue) {
   const outputClientId = document.getElementById("outputClientId");
   const outputClientIdSelect = document.getElementById("outputClientIdSelect");
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
 
   const clientIds = parseCsvList(clientIdValue);
-  const clientNames = parseCsvList(clientNameValue);
 
   outputClientIdSelect.innerHTML = "";
-  outputClientNameSelect.innerHTML = "";
 
   if (clientIds.length > 1) {
     outputClientId.style.display = "none";
@@ -118,46 +103,15 @@ function setOutputClientFields(clientIdValue, clientNameValue) {
       const option = document.createElement("option");
       option.value = clientIds[index];
       option.textContent = clientIds[index];
-      option.dataset.clientName = clientNames[index] || "";
-      option.dataset.pairIndex = String(index);
       outputClientIdSelect.appendChild(option);
     }
 
     outputClientIdSelect.value = "";
-    outputClientName.value = "";
   } else {
     outputClientId.style.display = "";
     outputClientIdSelect.style.display = "none";
     outputClientId.value = clientIds[0] || String(clientIdValue || "");
   }
-
-  if (clientNames.length > 1) {
-    outputClientName.style.display = "none";
-    outputClientNameSelect.style.display = "";
-    outputClientName.value = "";
-
-    const blankNameOption = document.createElement("option");
-    blankNameOption.value = "";
-    blankNameOption.textContent = "";
-    outputClientNameSelect.appendChild(blankNameOption);
-
-    for (let index = 0; index < clientNames.length; index++) {
-      const name = clientNames[index];
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      option.dataset.clientId = clientIds[index] || "";
-      option.dataset.pairIndex = String(index);
-      outputClientNameSelect.appendChild(option);
-    }
-
-    outputClientNameSelect.value = "";
-    return;
-  }
-
-  outputClientName.style.display = "";
-  outputClientNameSelect.style.display = "none";
-  outputClientName.value = clientNames[0] || String(clientNameValue || "");
 }
 
 // ============================================================================
@@ -258,7 +212,7 @@ function handleGridActionClick(params) {
   const target = params.event.target;
 
   if (target.classList.contains("select-btn")) {
-    setOutputClientFields(rowData.client_id, rowData.client_name);
+    setOutputClientFields(rowData.client_id);
     document.querySelector('.output-section input[data-field="contact_id"]').value =
       rowData.contact_id || "";
     document.querySelector('.output-section input[data-field="law_firm_id"]').value =
@@ -663,7 +617,6 @@ async function handleCsvDownload() {
 async function copyOutputToClipboard() {
   try {
     const clientId = getOutputClientIdValue();
-    const clientName = getOutputClientNameValue();
     const contactId = document.querySelector(
       '.output-section input[data-field="contact_id"]'
     ).value;
@@ -688,10 +641,6 @@ async function copyOutputToClipboard() {
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Client ID</td>
       <td style="border: 1px solid #000; padding: 4px;">${clientId}</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid #000; padding: 4px;">Client Name</td>
-      <td style="border: 1px solid #000; padding: 4px;">${clientName}</td>
     </tr>
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Contact ID</td>
@@ -731,7 +680,6 @@ async function copyOutputToClipboard() {
     // Create plain text version
     const plainText = [
       ["Client ID", clientId],
-      ["Client Name", clientName],
       ["Contact ID", contactId],
       ["Topic", topic],
       ["Firm ID(s)", firmId],
@@ -804,52 +752,6 @@ function setupEventListeners() {
 
   // Collapsible form toggles
   setupCollapsibleToggle("addContactToggle", "addContactForm", "addContactIcon");
-
-  const outputClientIdSelect = document.getElementById("outputClientIdSelect");
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientId = document.getElementById("outputClientId");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
-  outputClientIdSelect.addEventListener("change", function () {
-    const selectedOption = this.options[this.selectedIndex];
-
-    if (outputClientNameSelect.style.display !== "none") {
-      const pairIndex = selectedOption?.dataset?.pairIndex;
-      if (!pairIndex) {
-        outputClientNameSelect.value = "";
-        outputClientName.value = "";
-        return;
-      }
-
-      const pairedNameOption = Array.from(outputClientNameSelect.options).find(
-        (option) => option.dataset.pairIndex === pairIndex
-      );
-      outputClientNameSelect.value = pairedNameOption ? pairedNameOption.value : "";
-      outputClientName.value = outputClientNameSelect.value;
-      return;
-    }
-
-    outputClientName.value = selectedOption?.dataset?.clientName || "";
-  });
-
-  outputClientNameSelect.addEventListener("change", function () {
-    if (outputClientIdSelect.style.display === "none") {
-      return;
-    }
-
-    const selectedOption = this.options[this.selectedIndex];
-    const pairIndex = selectedOption?.dataset?.pairIndex;
-    if (!pairIndex) {
-      outputClientIdSelect.value = "";
-      outputClientId.value = "";
-      return;
-    }
-
-    const pairedIdOption = Array.from(outputClientIdSelect.options).find(
-      (option) => option.dataset.pairIndex === pairIndex
-    );
-    outputClientIdSelect.value = pairedIdOption ? pairedIdOption.value : "";
-    outputClientId.value = outputClientIdSelect.value;
-  });
 
   // Add contact button
   const addContactBtn = document.getElementById("addContactBtn");
@@ -934,7 +836,7 @@ async function initializeApp() {
   initializeGrid();
 
   // Load initial data
-  setOutputClientFields("", "");
+  setOutputClientFields("");
 
   // Setup event listeners
   setupEventListeners();

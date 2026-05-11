@@ -81,28 +81,13 @@ function getOutputClientIdValue() {
   return outputClientId.value;
 }
 
-function getOutputClientNameValue() {
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
-
-  if (outputClientNameSelect.style.display !== "none") {
-    return outputClientNameSelect.value;
-  }
-
-  return outputClientName.value;
-}
-
-function setOutputClientFields(clientIdValue, clientNameValue) {
+function setOutputClientFields(clientIdValue) {
   const outputClientId = document.getElementById("outputClientId");
   const outputClientIdSelect = document.getElementById("outputClientIdSelect");
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
 
   const clientIds = parseCsvList(clientIdValue);
-  const clientNames = parseCsvList(clientNameValue);
 
   outputClientIdSelect.innerHTML = "";
-  outputClientNameSelect.innerHTML = "";
 
   if (clientIds.length > 1) {
     outputClientId.style.display = "none";
@@ -118,46 +103,15 @@ function setOutputClientFields(clientIdValue, clientNameValue) {
       const option = document.createElement("option");
       option.value = clientIds[index];
       option.textContent = clientIds[index];
-      option.dataset.clientName = clientNames[index] || "";
-      option.dataset.pairIndex = String(index);
       outputClientIdSelect.appendChild(option);
     }
 
     outputClientIdSelect.value = "";
-    outputClientName.value = "";
   } else {
     outputClientId.style.display = "";
     outputClientIdSelect.style.display = "none";
     outputClientId.value = clientIds[0] || String(clientIdValue || "");
   }
-
-  if (clientNames.length > 1) {
-    outputClientName.style.display = "none";
-    outputClientNameSelect.style.display = "";
-    outputClientName.value = "";
-
-    const blankNameOption = document.createElement("option");
-    blankNameOption.value = "";
-    blankNameOption.textContent = "";
-    outputClientNameSelect.appendChild(blankNameOption);
-
-    for (let index = 0; index < clientNames.length; index++) {
-      const name = clientNames[index];
-      const option = document.createElement("option");
-      option.value = name;
-      option.textContent = name;
-      option.dataset.clientId = clientIds[index] || "";
-      option.dataset.pairIndex = String(index);
-      outputClientNameSelect.appendChild(option);
-    }
-
-    outputClientNameSelect.value = "";
-    return;
-  }
-
-  outputClientName.style.display = "";
-  outputClientNameSelect.style.display = "none";
-  outputClientName.value = clientNames[0] || String(clientNameValue || "");
 }
 
 // ============================================================================
@@ -184,15 +138,69 @@ function createGridColumnDefs() {
       sortable: false,
       filter: false,
     },
-    { field: "contact_id", headerName: "Contact ID", width: CONFIG.COLUMN_WIDTHS.CONTACT_ID, filter: true, sortable: true },
-    { field: "first_name", headerName: "First Name", width: CONFIG.COLUMN_WIDTHS.FIRST_NAME, filter: true, sortable: true },
-    { field: "last_name", headerName: "Last Name", width: CONFIG.COLUMN_WIDTHS.LAST_NAME, filter: true, sortable: true },
-    { field: "client_id", headerName: "Client ID", width: CONFIG.COLUMN_WIDTHS.CLIENT_ID, filter: true, sortable: true },
-    { field: "client_name", headerName: "Client Name", width: CONFIG.COLUMN_WIDTHS.CLIENT_NAME, filter: true, sortable: true },
-    { field: "email_address", headerName: "Email Address", width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS, filter: true, sortable: true },
-    { field: "phone", headerName: "Phone", width: CONFIG.COLUMN_WIDTHS.PHONE, filter: true, sortable: true },
-    { field: "law_firm_id", headerName: "Law Firm ID", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID, filter: true, sortable: true },
-    { field: "law_firm_name", headerName: "Law Firm", width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME, filter: true, sortable: true },
+    {
+      field: "contact_id",
+      headerName: "Contact ID",
+      width: CONFIG.COLUMN_WIDTHS.CONTACT_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "first_name",
+      headerName: "First Name",
+      width: CONFIG.COLUMN_WIDTHS.FIRST_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "last_name",
+      headerName: "Last Name",
+      width: CONFIG.COLUMN_WIDTHS.LAST_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "client_id",
+      headerName: "Client ID",
+      width: CONFIG.COLUMN_WIDTHS.CLIENT_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "client_name",
+      headerName: "Client Name",
+      width: CONFIG.COLUMN_WIDTHS.CLIENT_NAME,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "email_address",
+      headerName: "Email Address",
+      width: CONFIG.COLUMN_WIDTHS.EMAIL_ADDRESS,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "phone",
+      headerName: "Phone",
+      width: CONFIG.COLUMN_WIDTHS.PHONE,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "law_firm_id",
+      headerName: "Law Firm ID",
+      width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_ID,
+      filter: true,
+      sortable: true,
+    },
+    {
+      field: "law_firm_name",
+      headerName: "Law Firm",
+      width: CONFIG.COLUMN_WIDTHS.LAW_FIRM_NAME,
+      filter: true,
+      sortable: true,
+    },
   ];
 }
 
@@ -204,9 +212,11 @@ function handleGridActionClick(params) {
   const target = params.event.target;
 
   if (target.classList.contains("select-btn")) {
-    setOutputClientFields(rowData.client_id, rowData.client_name);
-    document.querySelector('.output-section input[data-field="contact_id"]').value = rowData.contact_id || "";
-    document.querySelector('.output-section input[data-field="law_firm_id"]').value = rowData.law_firm_id || "";
+    setOutputClientFields(rowData.client_id);
+    document.querySelector('.output-section input[data-field="contact_id"]').value =
+      rowData.contact_id || "";
+    document.querySelector('.output-section input[data-field="law_firm_id"]').value =
+      rowData.law_firm_id || "";
   } else if (target.classList.contains("update-btn")) {
     openUpdateModal(rowData);
   } else if (target.classList.contains("delete-btn")) {
@@ -418,11 +428,7 @@ async function saveUpdatedContact() {
   };
 
   // Validation
-  if (
-    !contactData.contact_id ||
-    !contactData.first_name ||
-    !contactData.last_name
-  ) {
+  if (!contactData.contact_id || !contactData.first_name || !contactData.last_name) {
     alert("Please fill in all required fields (marked with *)");
     return;
   }
@@ -611,14 +617,21 @@ async function handleCsvDownload() {
 async function copyOutputToClipboard() {
   try {
     const clientId = getOutputClientIdValue();
-    const clientName = getOutputClientNameValue();
-    const contactId = document.querySelector('.output-section input[data-field="contact_id"]').value;
+    const contactId = document.querySelector(
+      '.output-section input[data-field="contact_id"]'
+    ).value;
     const topic = document.querySelector('.output-section select[data-field="topic"]').value;
     const firmId = document.querySelector('.output-section input[data-field="law_firm_id"]').value;
-    const claimantId = document.querySelector('.output-section input[data-field="claimant_id"]').value;
-    const inboundOutbound = document.querySelector('.output-section select[data-field="inbound_outbound"]').value;
+    const claimantId = document.querySelector(
+      '.output-section input[data-field="claimant_id"]'
+    ).value;
+    const inboundOutbound = document.querySelector(
+      '.output-section select[data-field="inbound_outbound"]'
+    ).value;
     const outreach = document.querySelector('.output-section select[data-field="outreach"]').value;
-    const commMethod = document.querySelector('.output-section select[data-field="communication_method"]').value;
+    const commMethod = document.querySelector(
+      '.output-section select[data-field="communication_method"]'
+    ).value;
     const message = document.querySelector('.output-section input[data-field="message"]').value;
 
     // Create HTML table
@@ -628,10 +641,6 @@ async function copyOutputToClipboard() {
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Client ID</td>
       <td style="border: 1px solid #000; padding: 4px;">${clientId}</td>
-    </tr>
-    <tr>
-      <td style="border: 1px solid #000; padding: 4px;">Client Name</td>
-      <td style="border: 1px solid #000; padding: 4px;">${clientName}</td>
     </tr>
     <tr>
       <td style="border: 1px solid #000; padding: 4px;">Contact ID</td>
@@ -671,7 +680,6 @@ async function copyOutputToClipboard() {
     // Create plain text version
     const plainText = [
       ["Client ID", clientId],
-      ["Client Name", clientName],
       ["Contact ID", contactId],
       ["Topic", topic],
       ["Firm ID(s)", firmId],
@@ -745,52 +753,6 @@ function setupEventListeners() {
   // Collapsible form toggles
   setupCollapsibleToggle("addContactToggle", "addContactForm", "addContactIcon");
 
-  const outputClientIdSelect = document.getElementById("outputClientIdSelect");
-  const outputClientName = document.getElementById("outputClientName");
-  const outputClientId = document.getElementById("outputClientId");
-  const outputClientNameSelect = document.getElementById("outputClientNameSelect");
-  outputClientIdSelect.addEventListener("change", function () {
-    const selectedOption = this.options[this.selectedIndex];
-
-    if (outputClientNameSelect.style.display !== "none") {
-      const pairIndex = selectedOption?.dataset?.pairIndex;
-      if (!pairIndex) {
-        outputClientNameSelect.value = "";
-        outputClientName.value = "";
-        return;
-      }
-
-      const pairedNameOption = Array.from(outputClientNameSelect.options).find(
-        (option) => option.dataset.pairIndex === pairIndex
-      );
-      outputClientNameSelect.value = pairedNameOption ? pairedNameOption.value : "";
-      outputClientName.value = outputClientNameSelect.value;
-      return;
-    }
-
-    outputClientName.value = selectedOption?.dataset?.clientName || "";
-  });
-
-  outputClientNameSelect.addEventListener("change", function () {
-    if (outputClientIdSelect.style.display === "none") {
-      return;
-    }
-
-    const selectedOption = this.options[this.selectedIndex];
-    const pairIndex = selectedOption?.dataset?.pairIndex;
-    if (!pairIndex) {
-      outputClientIdSelect.value = "";
-      outputClientId.value = "";
-      return;
-    }
-
-    const pairedIdOption = Array.from(outputClientIdSelect.options).find(
-      (option) => option.dataset.pairIndex === pairIndex
-    );
-    outputClientIdSelect.value = pairedIdOption ? pairedIdOption.value : "";
-    outputClientId.value = outputClientIdSelect.value;
-  });
-
   // Add contact button
   const addContactBtn = document.getElementById("addContactBtn");
   addContactBtn.addEventListener("click", async function () {
@@ -807,11 +769,7 @@ function setupEventListeners() {
     };
 
     // Validate required fields
-    if (
-      !contactData.contact_id ||
-      !contactData.first_name ||
-      !contactData.last_name
-    ) {
+    if (!contactData.contact_id || !contactData.first_name || !contactData.last_name) {
       showMessage(
         "addContactMessage",
         "Contact ID, First Name, and Last Name are required",
@@ -878,7 +836,7 @@ async function initializeApp() {
   initializeGrid();
 
   // Load initial data
-  setOutputClientFields("", "");
+  setOutputClientFields("");
 
   // Setup event listeners
   setupEventListeners();

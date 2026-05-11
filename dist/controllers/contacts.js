@@ -57,7 +57,10 @@ export class ContactsController {
                 orderByColumn[`contact.${sortField}`] = sortOrder;
                 queryBuilder = queryBuilder.orderBy(orderByColumn);
             }
-            const contacts = await queryBuilder.skip(page * pageSize).take(pageSize).getMany();
+            const contacts = await queryBuilder
+                .skip(page * pageSize)
+                .take(pageSize)
+                .getMany();
             ResponseBuilder.paginated(res, contacts, totalCount, page, pageSize);
         }
         catch (error) {

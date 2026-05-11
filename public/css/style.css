@@ -285,10 +285,6 @@ input[type="file"] {
   border-radius: 4px;
 }
 
-.form-input--readonly {
-  background-color: #f0f0f0;
-}
-
 /* === BUTTONS === */
 button {
   padding: var(--spacing-sm) var(--spacing-xl);

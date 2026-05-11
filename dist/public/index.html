@@ -29,11 +29,14 @@
         <div class="modal-form-grid">
           <div>
             <label class="form-label" for="updateContactId">Contact ID *</label>
-            <input id="updateContactId" class="form-input" 
+            <input
+              id="updateContactId"
+              class="form-input"
               type="number"
               min="1"
               step="1"
-              required />
+              required
+            />
           </div>
           <div>
             <label class="form-label" for="updateFirstName">First Name *</label>
@@ -109,7 +112,9 @@
             <div class="form-grid">
               <div class="form-field">
                 <label class="form-label" for="newContactId">Contact ID *</label>
-                <input id="newContactId" class="form-input" 
+                <input
+                  id="newContactId"
+                  class="form-input"
                   type="number"
                   min="1"
                   step="1"
@@ -182,15 +187,12 @@
             <tr>
               <th>Client ID</th>
               <td>
-                <input type="text" data-field="client_id" id="outputClientId" readonly />
-                <select data-field="client_id" id="outputClientIdSelect" style="display: none"></select>
-              </td>
-            </tr>
-            <tr>
-              <th>Client Name</th>
-              <td>
-                <input type="text" data-field="client_name" id="outputClientName" readonly />
-                <select data-field="client_name" id="outputClientNameSelect" style="display: none"></select>
+                <input type="text" data-field="client_id" id="outputClientId" />
+                <select
+                  data-field="client_id"
+                  id="outputClientIdSelect"
+                  style="display: none"
+                ></select>
               </td>
             </tr>
             <tr>
