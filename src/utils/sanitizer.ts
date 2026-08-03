@@ -17,6 +17,30 @@ export class InputSanitizer {
   }
 
   /**
+   * Combine two semicolon/comma-delimited lists (e.g., client IDs or client names) into a
+   * single deduplicated list, preserving order with existing entries first followed by any
+   * new entries not already present.
+   */
+  static combineDelimitedLists(existingValue: string, newValue: string): string {
+    const combined = [
+      ...this.parseDelimitedList(existingValue),
+      ...this.parseDelimitedList(newValue),
+    ];
+
+    const seen = new Set<string>();
+    const deduped: string[] = [];
+
+    for (const entry of combined) {
+      if (!seen.has(entry)) {
+        seen.add(entry);
+        deduped.push(entry);
+      }
+    }
+
+    return deduped.join(", ");
+  }
+
+  /**
    * Sanitize a string by escaping HTML and trimming whitespace
    */
   static sanitizeString(input: string): string {

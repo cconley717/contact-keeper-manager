@@ -13,6 +13,26 @@ export class InputSanitizer {
             .filter((entry) => entry.length > 0);
     }
     /**
+     * Combine two semicolon/comma-delimited lists (e.g., client IDs or client names) into a
+     * single deduplicated list, preserving order with existing entries first followed by any
+     * new entries not already present.
+     */
+    static combineDelimitedLists(existingValue, newValue) {
+        const combined = [
+            ...this.parseDelimitedList(existingValue),
+            ...this.parseDelimitedList(newValue),
+        ];
+        const seen = new Set();
+        const deduped = [];
+        for (const entry of combined) {
+            if (!seen.has(entry)) {
+                seen.add(entry);
+                deduped.push(entry);
+            }
+        }
+        return deduped.join(", ");
+    }
+    /**
      * Sanitize a string by escaping HTML and trimming whitespace
      */
     static sanitizeString(input) {

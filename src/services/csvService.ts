@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import { Contact } from "../entities/Contact.js";
 import { CSV_CONFIG } from "../constants.js";
 import { validateContactData } from "../utils/contactValidator.js";
+import { InputSanitizer } from "../utils/sanitizer.js";
 
 export interface CsvImportResult {
   totalRecords: number;
@@ -84,22 +85,37 @@ export class CsvService {
     const result = await this.dataSource.transaction(async (transactionalEntityManager) => {
       const contactRepository = transactionalEntityManager.getRepository(Contact);
 
-      // Get all existing contact IDs in one query
+      // Get all existing contacts along with their client_id/client_name so those lists can be
+      // merged rather than overwritten (prevents losing existing client associations on import)
       const contactIds = contacts.map((c) => c.contact_id);
       const existingContacts = await contactRepository.find({
-        select: ["contact_id"],
+        select: ["contact_id", "client_id", "client_name"],
         where: contactIds.map((id) => ({ contact_id: id })),
       });
 
-      const existingContactIds = new Set(existingContacts.map((c) => c.contact_id));
+      const existingContactMap = new Map(existingContacts.map((c) => [c.contact_id, c]));
 
       // Separate into inserts and updates
       const toInsert: Partial<Contact>[] = [];
       const toUpdate: Partial<Contact>[] = [];
 
       for (const contactData of contacts) {
-        if (contactData.contact_id && existingContactIds.has(contactData.contact_id)) {
-          toUpdate.push(contactData);
+        const existingContact = existingContactMap.get(contactData.contact_id);
+
+        if (existingContact) {
+          // Merge client_id/client_name lists (deduplicated) instead of overwriting so existing
+          // associations aren't lost when a contact reappears in a subsequent CSV import
+          toUpdate.push({
+            ...contactData,
+            client_id: InputSanitizer.combineDelimitedLists(
+              existingContact.client_id,
+              contactData.client_id
+            ),
+            client_name: InputSanitizer.combineDelimitedLists(
+              existingContact.client_name,
+              contactData.client_name
+            ),
+          });
         } else {
           toInsert.push(contactData);
         }
